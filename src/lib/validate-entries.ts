@@ -2,7 +2,7 @@ import { formatResourceGroup, formatResourceKey, formatResourceType } from "@s4t
 import { Package, RawResource, StringTableResource, XmlResource } from "@s4tk/models";
 import type { ResourceKeyPair } from "@s4tk/models/types";
 import { BinaryResourceType, SimDataGroup, StringTableLocale, TuningResourceType } from "@s4tk/models/enums";
-import type { ValidatedEntries, ValidatedEntry, ValidatedStringTableSet, ValidatedTuningPair } from "./types";
+import type { ValidatedEntries, ValidatedEntry, ValidatedStringTableEntry, ValidatedStringTableSet, ValidatedTuningPair } from "./types";
 import { validateEntry } from "./validate-entry";
 import { REQUIRED_SIMDATAS, UNSCANNABLE_TYPES } from "./constants";
 
@@ -95,10 +95,10 @@ function _organizeEntries(entries: ResourceKeyPair<RawResource>[]): ValidatedEnt
       stblsByInstance.forEach((entries, groupInstance) => {
         stbls.push({
           groupInstance,
-          diagnostics: [],
-          entries: entries.map(entry => {
-            const locale = StringTableLocale.getLocale(entry.key.instance);
-            return { locale, entry: addDiagnostics(entry) };
+          stringTables: entries.map(entry => {
+            const stbl = addDiagnostics(entry) as ValidatedStringTableEntry;
+            stbl.locale = StringTableLocale.getLocale(entry.key.instance);
+            return stbl;
           })
         });
       });
@@ -118,8 +118,8 @@ function _validatePairedTuning(pair: ValidatedTuningPair) {
     validateEntry(pair.simdata);
     const expectedGroup = SimDataGroup.getForTuning(pair.tuning.entry.key.type);
     if (expectedGroup in SimDataGroup) {
-      const expectedGroupName = SimDataGroup[expectedGroup];
       if (expectedGroup !== pair.simdata.entry.key.group) {
+        const expectedGroupName = SimDataGroup[expectedGroup];
         const foundGroupName = SimDataGroup[pair.simdata.entry.key.group] ?? "Unknown";
         pair.simdata.diagnostics.push({
           level: "error",
@@ -137,25 +137,26 @@ function _validatePairedTuning(pair: ValidatedTuningPair) {
     if (REQUIRED_SIMDATAS.types.has(i)) {
       pair.tuning.diagnostics.push({
         level: "error",
-        message: `Tuning type ${tuningTypeName} (${formatResourceType(pair.tuning.entry.key.type)}) is known to require SimData, but one wasn't found.`
+        message: `Tuning type ${tuningTypeName} (${formatResourceType(pair.tuning.entry.key.type)}) is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`
       });
     } else if (REQUIRED_SIMDATAS.classes.has(`${i}:${c}`)) {
       pair.tuning.diagnostics.push({
         level: "error",
-        message: `Tuning class ${c} is known to require SimData, but one wasn't found.`
+        message: `Tuning class ${c} is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`
       });
     }
+    // TODO: personality traits?
   }
 }
 
 function _validateStringTableSet(set: ValidatedStringTableSet) {
   let expectedSize: number = undefined;
-  set.entries.forEach(({ entry }) => {
-    validateEntry(entry);
-    if (!entry.parsed) return;
-    const size = (entry.entry.value as StringTableResource).size;
+  set.stringTables.forEach(stbl => {
+    validateEntry(stbl);
+    if (!stbl.parsed) return;
+    const size = (stbl.entry.value as StringTableResource).size;
     expectedSize ??= size;
-    if (expectedSize !== size) entry.diagnostics.push({
+    if (expectedSize !== size) stbl.diagnostics.push({
       level: "warning",
       message: "Size of this string table is inconsistent with other locales."
     });
@@ -199,7 +200,6 @@ function _validateRepeatedTuningNames(pairs: ValidatedTuningPair[]) {
 
 function _validateResourceKeys(entries: ValidatedEntries) {
   const filesByKey = new Map<string, ValidatedEntry[]>();
-  const filesByInstance = new Map<bigint, ValidatedEntry[]>();
 
   const warnInstance = (validated: ValidatedEntry) => {
     if (UNSCANNABLE_TYPES.has(validated.entry.key.type)) return;
@@ -230,15 +230,6 @@ function _validateResourceKeys(entries: ValidatedEntries) {
     } else {
       filesByKey.set(key, [validated]);
     }
-
-    if (!isSimData) {
-      const instance = validated.entry.key.instance;
-      if (filesByInstance.has(instance)) {
-        filesByInstance.get(instance).push(validated);
-      } else {
-        filesByInstance.set(instance, [validated]);
-      }
-    }
   };
 
   entries.pairedTunings.forEach(({ tuning, simdata }) => {
@@ -246,8 +237,8 @@ function _validateResourceKeys(entries: ValidatedEntries) {
     if (simdata) addFile(simdata, true);
   });
 
-  entries.stringTables.forEach(({ entries }) => {
-    entries.forEach(({ entry }) => addFile(entry));
+  entries.stringTables.forEach(stblSet => {
+    stblSet.stringTables.forEach(stbl => addFile(stbl));
   });
 
   entries.others.forEach(other => addFile(other));
@@ -257,15 +248,6 @@ function _validateResourceKeys(entries: ValidatedEntries) {
       entry.diagnostics.push({
         level: "error",
         message: `Resource key ${key} is in use by ${entries.length} files.`
-      });
-    });
-  });
-
-  filesByInstance.forEach((entries, instance) => {
-    if (entries.length > 1) entries.forEach(entry => {
-      entry.diagnostics.push({
-        level: "warning",
-        message: `Instance of ${instance} is in use by ${entries.length} files.`
       });
     });
   });

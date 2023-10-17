@@ -24,15 +24,19 @@ export interface ValidatedEntry {
 }
 
 /**
+ * Wrapper for a `ResourceKeyPair<StringTableResource>` with its locale and
+ * diagnostic information.
+ */
+export interface ValidatedStringTableEntry extends ValidatedEntry {
+  locale: StringTableLocale;
+}
+
+/**
  * Wrapper for a grouping of string tables that share the same instance base.
  */
 export interface ValidatedStringTableSet {
   groupInstance: string;
-  diagnostics: DiagnosticInfo[];
-  entries: {
-    locale: StringTableLocale;
-    entry: ValidatedEntry;
-  }[];
+  stringTables: ValidatedStringTableEntry[];
 }
 
 /**

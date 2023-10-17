@@ -32,7 +32,11 @@ export function validateEntry(wrapper: ValidatedEntry) {
 //#region Helper Functions
 
 function _validateTuning(wrapper: ValidatedEntry) {
-  const tuning = _parseFromRaw(wrapper, "tuning", (b) => XmlResource.from(b));
+  const tuning = _parseFromRaw(wrapper, "tuning", (b) => {
+    const xml = XmlResource.from(b);
+    xml.dom;
+    return xml;
+  });
   if (!tuning) return;
 
   try {
@@ -195,6 +199,8 @@ function _tryValidateUnknown(wrapper: ValidatedEntry) {
         level: "error",
         message: "File appears to be a SimData, but is not using the SimData type (545AC67A)."
       });
+      wrapper.entry.value = SimDataResource.from(wrapper.entry.value.getBuffer());
+      wrapper.parsed = true;
     } else if (magic === "STBL") {
       wrapper.diagnostics.push({
         level: "error",
@@ -202,6 +208,9 @@ function _tryValidateUnknown(wrapper: ValidatedEntry) {
       });
     } else if (magic.startsWith("<")) {
       const xml = XmlResource.from(wrapper.entry.value.getBuffer());
+      xml.dom;
+      wrapper.entry.value = xml;
+      wrapper.parsed = true;
       if (xml.root.tag === "I" || xml.root.tag === "M") {
         wrapper.diagnostics.push({
           level: "warning",
