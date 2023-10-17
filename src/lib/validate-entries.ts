@@ -2,7 +2,7 @@ import { formatResourceGroup, formatResourceKey, formatResourceType } from "@s4t
 import { Package, RawResource, StringTableResource, XmlResource } from "@s4tk/models";
 import type { ResourceKeyPair } from "@s4tk/models/types";
 import { BinaryResourceType, SimDataGroup, StringTableLocale, TuningResourceType } from "@s4tk/models/enums";
-import type { ValidatedEntries, ValidatedEntry, ValidatedStringTableEntry, ValidatedStringTableSet, ValidatedTuningPair } from "./types";
+import { DiagnosticLevel, type ValidatedEntries, type ValidatedEntry, type ValidatedStringTableEntry, type ValidatedStringTableSet, type ValidatedTuningPair } from "./types";
 import { validateEntry } from "./validate-entry";
 import { REQUIRED_SIMDATAS, UNSCANNABLE_TYPES } from "./constants";
 
@@ -122,13 +122,13 @@ function _validatePairedTuning(pair: ValidatedTuningPair) {
         const expectedGroupName = SimDataGroup[expectedGroup];
         const foundGroupName = SimDataGroup[pair.simdata.entry.key.group] ?? "Unknown";
         pair.simdata.diagnostics.push({
-          level: "error",
+          level: DiagnosticLevel.Error,
           message: `Expected this SimData to have a group of ${expectedGroupName} (${formatResourceGroup(expectedGroup)}), but found ${foundGroupName} (${formatResourceGroup(pair.simdata.entry.key.group)}).`
         });
       }
     } else {
       pair.simdata.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: `There is no known SimData group for tuning type ${tuningTypeName} (${formatResourceType(pair.tuning.entry.key.type)}). If you are sure this is correct, then S4TK might need to be updated.`
       });
     }
@@ -136,12 +136,12 @@ function _validatePairedTuning(pair: ValidatedTuningPair) {
     const { c, i } = (pair.tuning.entry.value as XmlResource).root.attributes;
     if (REQUIRED_SIMDATAS.types.has(i)) {
       pair.tuning.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: `Tuning type ${tuningTypeName} (${formatResourceType(pair.tuning.entry.key.type)}) is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`
       });
     } else if (REQUIRED_SIMDATAS.classes.has(`${i}:${c}`)) {
       pair.tuning.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: `Tuning class ${c} is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`
       });
     }
@@ -157,7 +157,7 @@ function _validateStringTableSet(set: ValidatedStringTableSet) {
     const size = (stbl.entry.value as StringTableResource).size;
     expectedSize ??= size;
     if (expectedSize !== size) stbl.diagnostics.push({
-      level: "warning",
+      level: DiagnosticLevel.Warning,
       message: "Size of this string table is inconsistent with other locales."
     });
   });
@@ -168,7 +168,7 @@ function _validateOther(wrapper: ValidatedEntry) {
 
   if (wrapper.entry.key.type === BinaryResourceType.SimData) {
     wrapper.diagnostics.push({
-      level: "warning",
+      level: DiagnosticLevel.Warning,
       message: "SimData is not paired with a tuning file."
     });
   }
@@ -191,7 +191,7 @@ function _validateRepeatedTuningNames(pairs: ValidatedTuningPair[]) {
   tuningsByName.forEach((tunings, filename) => {
     if (tunings.length > 1) tunings.forEach(tuning => {
       tuning.diagnostics.push({
-        level: "warning",
+        level: DiagnosticLevel.Warning,
         message: `${tunings.length} tuning files are using the name "${filename}".`
       });
     });
@@ -205,17 +205,17 @@ function _validateResourceKeys(entries: ValidatedEntries) {
     if (UNSCANNABLE_TYPES.has(validated.entry.key.type)) return;
     if (validated.entry.key.instance === 0n) {
       validated.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: "Resources cannot have an instance of 0."
       });
     } else if (validated.entry.key.instance === 0x811C9DC5n) {
       validated.diagnostics.push({
-        level: "warning",
+        level: DiagnosticLevel.Warning,
         message: "Instance is 0x811C9DC5 (the FNV-32 hash of an empty string)."
       });
     } else if (validated.entry.key.instance === 0xCBF29CE484222325n) {
       validated.diagnostics.push({
-        level: "warning",
+        level: DiagnosticLevel.Warning,
         message: "Instance is 0xCBF29CE484222325 (the FNV-64 hash of an empty string)."
       });
     }
@@ -246,7 +246,7 @@ function _validateResourceKeys(entries: ValidatedEntries) {
   filesByKey.forEach((entries, key) => {
     if (entries.length > 1) entries.forEach(entry => {
       entry.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: `Resource key ${key} is in use by ${entries.length} files.`
       });
     });

@@ -3,7 +3,7 @@ import { formatStringKey, formatResourceInstance, formatResourceType } from "@s4
 import { SimDataResource, StringTableResource, XmlResource } from "@s4tk/models";
 import { Resource } from "@s4tk/models/types";
 import { BinaryResourceType, TuningResourceType } from "@s4tk/models/enums";
-import type { ValidatedEntry } from "./types";
+import { DiagnosticLevel, type ValidatedEntry } from "./types";
 import { BIT_RESTRICTIONS, UNSCANNABLE_TYPES } from "./constants";
 
 //#region Exported Funtions
@@ -46,7 +46,7 @@ function _validateTuning(wrapper: ValidatedEntry) {
       _validateModuleTuning(wrapper, tuning);
     } else {
       return wrapper.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: `<${tuning.root.tag}> is not a valid root node in XML tuning.`
       });
     }
@@ -54,14 +54,14 @@ function _validateTuning(wrapper: ValidatedEntry) {
     const { s } = tuning.root.attributes;
     if (wrapper.entry.key.instance.toString() !== s) {
       wrapper.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: `Instance of ${formatResourceInstance(wrapper.entry.key.instance)} does not match s="${s}"`
       });
     }
   } catch (e) {
     const errorMsg = e instanceof Error ? e.message : e as string;
     wrapper.diagnostics.push({
-      level: "warning",
+      level: DiagnosticLevel.Warning,
       message: `Exception occurred while validating (${errorMsg})`
     });
   }
@@ -71,7 +71,7 @@ function _validateInstanceTuning(wrapper: ValidatedEntry, tuning: XmlResource) {
   const { c, i, m, n, s } = tuning.root.attributes;
 
   if (!(c && i && m && n && s)) return wrapper.diagnostics.push({
-    level: "error",
+    level: DiagnosticLevel.Error,
     message: `Instance tuning must contain all c, i, m, n, and s attributes.`
   });
 
@@ -81,7 +81,7 @@ function _validateInstanceTuning(wrapper: ValidatedEntry, tuning: XmlResource) {
     if (wrapper.entry.key.instance <= maxValue) continue;
     if (classNames.has(c)) {
       wrapper.diagnostics.push({
-        level: "warning",
+        level: DiagnosticLevel.Warning,
         message: `${c} is known to require ${maxBits}-bit instances (max value of ${maxValue}), but this one has an instance of ${wrapper.entry.key.instance}.`
       });
     }
@@ -91,14 +91,14 @@ function _validateInstanceTuning(wrapper: ValidatedEntry, tuning: XmlResource) {
   const expectedType = TuningResourceType.parseAttr(i);
   if (expectedType === TuningResourceType.Tuning) {
     wrapper.diagnostics.push({
-      level: "warning",
+      level: DiagnosticLevel.Warning,
       message: `Unrecognized instance type of i="${i}". If you are sure this is correct, then S4TK might need to be updated.`
     });
   } else if (expectedType !== wrapper.entry.key.type) {
     const foundName = TuningResourceType[wrapper.entry.key.type] ?? "Unknown";
     const expectedName = TuningResourceType[expectedType];
     wrapper.diagnostics.push({
-      level: "error",
+      level: DiagnosticLevel.Error,
       message: `Expected instance tuning with i="${i}" to have a type of ${expectedName} (${formatResourceType(expectedType)}), but found ${foundName} (${formatResourceType(wrapper.entry.key.type)}).`
     });
   }
@@ -110,19 +110,19 @@ function _validateModuleTuning(wrapper: ValidatedEntry, tuning: XmlResource) {
   if (wrapper.entry.key.type !== TuningResourceType.Tuning) {
     const foundName = TuningResourceType[wrapper.entry.key.type] ?? "Unknown";
     wrapper.diagnostics.push({
-      level: "error",
+      level: DiagnosticLevel.Error,
       message: `Expected module tuning to have a type of Tuning (${formatResourceType(TuningResourceType.Tuning)}), but found ${foundName} (${formatResourceType(wrapper.entry.key.type)}).`
     });
   }
 
   if (!(n && s)) return wrapper.diagnostics.push({
-    level: "error",
+    level: DiagnosticLevel.Error,
     message: `Module tuning must contain both n and s attributes.`
   });
 
   const expectedInstance = fnv64(n.replace(/\./g, "-"));
   if (s !== expectedInstance.toString()) wrapper.diagnostics.push({
-    level: "error",
+    level: DiagnosticLevel.Error,
     message: `Module tuning with n="${n}" must have s="${expectedInstance}", but found s="${s}" instead.`,
   });
 }
@@ -138,7 +138,7 @@ function _validateStringTable(wrapper: ValidatedEntry) {
   const repeatedKeys = stbl.findRepeatedKeys();
   repeatedKeys.forEach(key => {
     wrapper.diagnostics.push({
-      level: "error",
+      level: DiagnosticLevel.Error,
       message: `The key ${formatStringKey(key)} is used by more than one string.`,
     });
   });
@@ -149,18 +149,18 @@ function _validateStringTable(wrapper: ValidatedEntry) {
   });
   valueCounts.forEach((count, value) => {
     if (count > 1) wrapper.diagnostics.push({
-      level: "warning",
+      level: DiagnosticLevel.Warning,
       message: `The string "${value}" appears in more than one entry.`,
     });
   });
 
   if (stbl.hasKey(0)) wrapper.diagnostics.push({
-    level: "error",
+    level: DiagnosticLevel.Error,
     message: "At least one entry has the key 0x00000000.",
   });
 
   if (stbl.hasKey(0x811C9DC5)) wrapper.diagnostics.push({
-    level: "warning",
+    level: DiagnosticLevel.Warning,
     message: "At least one entry has the key 0x811C9DC5 (the FNV-32 hash of an empty string).",
   });
 }
@@ -179,12 +179,12 @@ function _parseFromRaw<T extends Resource>(
     const errorMsg = e instanceof Error ? e.message : e as string;
     if (!wrapper.parsed) {
       wrapper.diagnostics.push({
-        level: "fatal",
+        level: DiagnosticLevel.Fatal,
         message: `Not a valid ${type} (${errorMsg})`
       });
     } else {
       wrapper.diagnostics.push({
-        level: "warning",
+        level: DiagnosticLevel.Warning,
         message: `Exception occurred while parsing (${errorMsg})`
       });
     }
@@ -196,14 +196,14 @@ function _tryValidateUnknown(wrapper: ValidatedEntry) {
     const magic = wrapper.entry.value.getBuffer().toString("utf-8", 0, 4);
     if (magic === "DATA" && wrapper.entry.key.type !== BinaryResourceType.CombinedTuning) {
       wrapper.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: "File appears to be a SimData, but is not using the SimData type (545AC67A)."
       });
       wrapper.entry.value = SimDataResource.from(wrapper.entry.value.getBuffer());
       wrapper.parsed = true;
     } else if (magic === "STBL") {
       wrapper.diagnostics.push({
-        level: "error",
+        level: DiagnosticLevel.Error,
         message: "File appears to be a string table, but is not using the string table type (220557DA)."
       });
     } else if (magic.startsWith("<")) {
@@ -213,7 +213,7 @@ function _tryValidateUnknown(wrapper: ValidatedEntry) {
       wrapper.parsed = true;
       if (xml.root.tag === "I" || xml.root.tag === "M") {
         wrapper.diagnostics.push({
-          level: "warning",
+          level: DiagnosticLevel.Warning,
           message: "File appears to be XML tuning, but is not using a recognized tuning type. If you are sure this file's type is correct, S4TK may need to be updated."
         });
       }

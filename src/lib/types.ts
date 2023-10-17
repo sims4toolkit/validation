@@ -2,12 +2,21 @@ import type { StringTableLocale } from "@s4tk/models/enums";
 import type { ResourceKeyPair } from "@s4tk/models/types";
 
 /**
+ * How serious a diagnostic is. More serious levels have higher values.
+ */
+export enum DiagnosticLevel {
+  Warning = 1,
+  Error = 2,
+  Fatal = 3
+}
+
+/**
  * Diagnostic information for a resource entry.
  */
 export interface DiagnosticInfo {
-  level: "warning" | "error" | "fatal";
+  level: DiagnosticLevel;
   message: string;
-};
+}
 
 /**
  * Wrapper for a `ResourceKeyPair` and its diagnostic information.
