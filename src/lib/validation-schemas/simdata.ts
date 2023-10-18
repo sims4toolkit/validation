@@ -1,5 +1,5 @@
-import { SimDataResource } from "@s4tk/models";
-import type { OrganizedResources, ValidatedResource, ValidatedSimData } from "../types";
+import { SimDataResource, XmlResource } from "@s4tk/models";
+import type { OrganizedResources, ValidatedResource, ValidatedSimData, ValidatedTuning } from "../types";
 import { Diagnose, loadModel } from "../helpers";
 import { SimDataGroup, TuningResourceType } from "@s4tk/models/enums";
 import { formatAsHexString, formatResourceGroup, formatResourceType } from "@s4tk/hashing/formatting";
@@ -31,7 +31,15 @@ export function postValidateSimData(
   entry: ValidatedSimData,
   organized: OrganizedResources
 ) {
-  // TODO:
+  if (!entry.modelLoaded) return;
+  const tuning = organized.resources[entry.pairedTuningId];
+  if (tuning?.modelLoaded && (tuning as ValidatedTuning).domValid) {
+    const tuningName = (tuning.resource as XmlResource).root.name;
+    const simdataName = (entry.resource as SimDataResource).instance.name;
+    if (tuningName !== simdataName) {
+      Diagnose.warning(entry, `Expected SimData name to match tuning name of "${tuningName}", but found "${simdataName}". This has no effect on gameplay and may be ignored.`);
+    }
+  }
 }
 
 //#region Helpers
@@ -65,7 +73,7 @@ function _validateUnusedFlags(
 ) {
   if (!(simdata && tuning)) return;
   if (simdata.unused !== tuning.key.group) {
-    Diagnose.warning(entry, `By convention, this SimData's U flags should match its paired tuning's group of ${formatResourceGroup(tuning.key.group)}, but found u="${formatAsHexString(simdata.unused, 8, true)}" instead. This has no effect on gameplay and may be ignored.`);
+    Diagnose.warning(entry, `Expected SimData's flags to match paired tuning's group of ${formatResourceGroup(tuning.key.group)}, but found u="${formatAsHexString(simdata.unused, 8, true)}" instead. This has no effect on gameplay and may be ignored.`);
   }
 }
 

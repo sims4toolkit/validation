@@ -9,6 +9,7 @@ import { postValidateSimData, validateSimData } from "./validation-schemas/simda
 import { postValidateStringTable, validateStringTable } from "./validation-schemas/string-table";
 import { Diagnose, ItemCounter } from "./helpers";
 import { UNSCANNABLE_TYPES } from "./constants";
+import { formatResourceKey } from "@s4tk/hashing/formatting";
 
 /**
  * Validates the given resources in relation to one another, returning a list of
@@ -25,11 +26,9 @@ export default function validateResources(
 
   _runInitialValidation(organized);
   _runPostValidation(organized);
+  _validateMetaDataRepeats(organized);
 
-  // TODO: repeated resource keys
-  // TODO: repeated tuning names
-  // TODO: repeated tuning instance
-  // TODO: tuning name doesn't match SimData name
+  // TODO: string table counts
 
   return organized.resources;
 }
@@ -39,6 +38,8 @@ export default function validateResources(
 function _runInitialValidation(organized: OrganizedResources) {
   organized.resources.forEach(entry => {
     if (UNSCANNABLE_TYPES.has(entry.key.type)) return;
+
+    _validateReservedInstances(entry);
 
     try {
       switch (entry.schema) {
@@ -55,6 +56,16 @@ function _runInitialValidation(organized: OrganizedResources) {
       Diagnose.warning(entry, "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
     }
   });
+}
+
+function _validateReservedInstances(entry: ValidatedResource) {
+  if (entry.key.instance === 0n) {
+    Diagnose.error(entry, "Resources cannot have an instance of 0.");
+  } else if (entry.key.instance === 0x811C9DC5n) {
+    Diagnose.warning(entry, "Instance is 0x811C9DC5 (the FNV-32 hash of an empty string).");
+  } else if (entry.key.instance === 0xCBF29CE484222325n) {
+    Diagnose.warning(entry, "Instance is 0xCBF29CE484222325 (the FNV-64 hash of an empty string).");
+  }
 }
 
 function _runPostValidation(organized: OrganizedResources) {
@@ -103,10 +114,41 @@ function _tryValidateUnspecified(entry: ValidatedUnspecified) {
 
 function _validateMetaDataRepeats(organized: OrganizedResources) {
   const resourceKeys = new ItemCounter<string>();
-  const tuningNames = new ItemCounter<string>();
   const tuningIds = new ItemCounter<bigint>();
+  const tuningNames = new ItemCounter<string>();
 
-  // organized.ids.forEach
+  organized.resources.forEach(entry => {
+    resourceKeys.count(formatResourceKey(entry.key, "-"));
+    if (entry.schema === ValidationSchema.Tuning) {
+      tuningIds.count(entry.key.instance);
+      if (entry.domValid && (entry.resource as XmlResource).root.name) {
+        tuningNames.count((entry.resource as XmlResource).root.name);
+      }
+    }
+  });
+
+  organized.resources.forEach(entry => {
+    const key = formatResourceKey(entry.key, "-");
+    const resourceKeyCount = resourceKeys.get(key);
+    if (resourceKeyCount > 1) {
+      Diagnose.error(entry, `Key of ${key} is being used by ${resourceKeyCount} files. One will overwrite the others, and S4S will glitch while handling them.`);
+    }
+
+    if (entry.schema === ValidationSchema.Tuning) {
+      const idCount = tuningIds.get(entry.key.instance);
+      if (idCount > 2) {
+        Diagnose.warning(entry, `Instance of ${entry.key.instance} is being used by ${idCount} tuning files.`);
+      }
+
+      if (entry.domValid && (entry.resource as XmlResource).root.name) {
+        const filename = (entry.resource as XmlResource).root.name;
+        const nameCount = tuningNames.get(filename);
+        if (nameCount > 2) {
+          Diagnose.warning(entry, `Name of "${filename}" is being used by ${nameCount} tuning files.`);
+        }
+      }
+    }
+  });
 }
 
 //#endregion
