@@ -21,15 +21,19 @@ export default function validateResources(
   const organized = organizeResources(resources);
 
   organized.ids.forEach(entry => {
-    switch (entry.schema) {
-      case ValidationSchema.Tuning:
-        return validateTuning(entry, organized);
-      case ValidationSchema.SimData:
-        return validateSimData(entry, organized);
-      case ValidationSchema.StringTable:
-        return validateStringTable(entry, organized);
-      default:
-        return _tryValidateUnspecified(entry);
+    try {
+      switch (entry.schema) {
+        case ValidationSchema.Tuning:
+          return validateTuning(entry, organized);
+        case ValidationSchema.SimData:
+          return validateSimData(entry, organized);
+        case ValidationSchema.StringTable:
+          return validateStringTable(entry, organized);
+        default:
+          return _tryValidateUnspecified(entry);
+      }
+    } catch (e) {
+      Diagnose.warning(entry, "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
     }
   });
 
