@@ -16,8 +16,12 @@ export default function validateTuning(
   allResources: OrganizedResources
 ) {
   const tuning = loadModel("tuning", entry, b => XmlResource.from(b));
-  if (tuning === undefined) return;
+  if (tuning) _validateStandaloneTuning(entry, tuning);
+}
 
+//#region Helpers
+
+function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) {
   try {
     tuning.dom;
     entry.domValid = true;
@@ -46,8 +50,6 @@ export default function validateTuning(
     Diagnose.warning(entry, `Exception occurred while validating [${errorMsg}]`);
   }
 }
-
-//#region Helpers
 
 function _validateInstanceTuning(entry: ValidatedTuning, tuning: XmlResource) {
   const { c, i, m, n, s } = tuning.root.attributes;

@@ -13,8 +13,12 @@ export default function validateStringTable(
   allResources: OrganizedResources
 ) {
   const stbl = loadModel("string table", entry, b => StringTableResource.from(b));
-  if (stbl === undefined) return;
+  if (stbl) _validateStandaloneStbl(entry, stbl);
+}
 
+//#region Helpers
+
+function _validateStandaloneStbl(entry: ValidatedStringTable, stbl: StringTableResource) {
   const keyCounter = new ItemCounter<number>();
   const valueCounter = new ItemCounter<string>();
   stbl.entries.forEach(({ key, value }) => {
@@ -36,3 +40,5 @@ export default function validateStringTable(
     Diagnose.warning(entry, "At least one string has the key 0x811C9DC5 (the FNV-32 hash of an empty string).");
   }
 }
+
+//#endregion

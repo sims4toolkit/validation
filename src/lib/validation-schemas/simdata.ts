@@ -11,5 +11,5 @@ export default function validateSimData(
   entry: ValidatedSimData,
   allResources: OrganizedResources
 ) {
-  loadModel("SimData", entry, b => SimDataResource.from(b));
+  const simdata = loadModel("SimData", entry, b => SimDataResource.from(b));
 }
