@@ -8,14 +8,14 @@ import { formatAsHexString, formatResourceGroup, formatResourceType } from "@s4t
  * Validates an entry against the `SimData` schema.
  * 
  * @param entry SimData entry to validate
- * @param allResources OrganizedResources object for reference
+ * @param organized OrganizedResources object for reference
  */
 export function validateSimData(
   entry: ValidatedSimData,
-  allResources: OrganizedResources
+  organized: OrganizedResources
 ) {
   const simdata = loadModel("SimData", entry, b => SimDataResource.from(b));
-  const tuning = allResources.ids[entry.pairedTuningId];
+  const tuning = organized.resources[entry.pairedTuningId];
   _validateSimDataWithTuning(entry, tuning);
   _validateUnusedFlags(entry, simdata, tuning);
 }
@@ -25,11 +25,11 @@ export function validateSimData(
  * been validated.
  * 
  * @param entry SimData entry to post-validate
- * @param allResources OrganizedResources object for reference
+ * @param organized OrganizedResources object for reference
  */
 export function postValidateSimData(
   entry: ValidatedSimData,
-  allResources: OrganizedResources
+  organized: OrganizedResources
 ) {
   // TODO:
 }

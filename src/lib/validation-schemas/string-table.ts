@@ -7,11 +7,11 @@ import { Diagnose, ItemCounter, loadModel } from "../helpers";
  * Validates an entry against the `StringTable` schema.
  * 
  * @param entry String table entry to validate
- * @param allResources OrganizedResources object for reference
+ * @param organized OrganizedResources object for reference
  */
 export function validateStringTable(
   entry: ValidatedStringTable,
-  allResources: OrganizedResources
+  organized: OrganizedResources
 ) {
   const stbl = loadModel("string table", entry, b => StringTableResource.from(b));
   if (stbl) _validateStandaloneStbl(entry, stbl);
@@ -22,11 +22,11 @@ export function validateStringTable(
  * been validated.
  * 
  * @param entry StringTable entry to post-validate
- * @param allResources OrganizedResources object for reference
+ * @param organized OrganizedResources object for reference
  */
 export function postValidateStringTable(
   entry: ValidatedStringTable,
-  allResources: OrganizedResources
+  organized: OrganizedResources
 ) {
   // TODO:
 }

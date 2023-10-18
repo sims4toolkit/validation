@@ -10,15 +10,15 @@ import { Diagnose, loadModel } from "../helpers";
  * Validates an entry against the `Tuning` schema.
  * 
  * @param entry Tuning entry to validate
- * @param allResources OrganizedResources object for reference
+ * @param organized OrganizedResources object for reference
  */
 export function validateTuning(
   entry: ValidatedTuning,
-  allResources: OrganizedResources
+  organized: OrganizedResources
 ) {
   const tuning = loadModel("tuning", entry, b => XmlResource.from(b));
   if (tuning) _validateStandaloneTuning(entry, tuning);
-  const simdata = allResources.ids[entry.pairedSimDataId];
+  const simdata = organized.resources[entry.pairedSimDataId];
   _validateTuningSimDataPair(entry, tuning, Boolean(simdata));
 }
 
@@ -27,11 +27,11 @@ export function validateTuning(
  * been validated.
  * 
  * @param entry Tuning entry to post-validate
- * @param allResources OrganizedResources object for reference
+ * @param organized OrganizedResources object for reference
  */
 export function postValidateTuning(
   entry: ValidatedTuning,
-  allResources: OrganizedResources
+  organized: OrganizedResources
 ) {
   // TODO:
 }

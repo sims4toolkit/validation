@@ -74,7 +74,7 @@ export type ValidatedResource =
  * Validated resources organized by ID and schema.
  */
 export interface OrganizedResources {
-  readonly ids: readonly ValidatedResource[];
+  readonly resources: readonly ValidatedResource[];
   readonly schemas: ReadonlyMap<ValidationSchema, readonly ValidatedResource[]>;
 }
 

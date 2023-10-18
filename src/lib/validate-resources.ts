@@ -7,7 +7,7 @@ import { ValidationSchema } from "./enums";
 import { postValidateTuning, validateTuning } from "./validation-schemas/tuning";
 import { postValidateSimData, validateSimData } from "./validation-schemas/simdata";
 import { postValidateStringTable, validateStringTable } from "./validation-schemas/string-table";
-import { Diagnose } from "./helpers";
+import { Diagnose, ItemCounter } from "./helpers";
 import { UNSCANNABLE_TYPES } from "./constants";
 
 /**
@@ -31,13 +31,13 @@ export default function validateResources(
   // TODO: repeated tuning instance
   // TODO: tuning name doesn't match SimData name
 
-  return organized.ids;
+  return organized.resources;
 }
 
 //#region Helpers
 
 function _runInitialValidation(organized: OrganizedResources) {
-  organized.ids.forEach(entry => {
+  organized.resources.forEach(entry => {
     if (UNSCANNABLE_TYPES.has(entry.key.type)) return;
 
     try {
@@ -58,7 +58,7 @@ function _runInitialValidation(organized: OrganizedResources) {
 }
 
 function _runPostValidation(organized: OrganizedResources) {
-  organized.ids.forEach(entry => {
+  organized.resources.forEach(entry => {
     if (UNSCANNABLE_TYPES.has(entry.key.type)) return;
 
     try {
@@ -99,6 +99,14 @@ function _tryValidateUnspecified(entry: ValidatedUnspecified) {
       }
     }
   } catch (_) { }
+}
+
+function _validateMetaDataRepeats(organized: OrganizedResources) {
+  const resourceKeys = new ItemCounter<string>();
+  const tuningNames = new ItemCounter<string>();
+  const tuningIds = new ItemCounter<bigint>();
+
+  // organized.ids.forEach
 }
 
 //#endregion

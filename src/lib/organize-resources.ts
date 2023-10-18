@@ -83,7 +83,7 @@ export default function organizeResources(
   });
 
   return {
-    ids: validatedResources,
+    resources: validatedResources,
     schemas: resourcesBySchema
   };
 }
