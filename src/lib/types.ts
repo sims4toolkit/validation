@@ -1,68 +1,81 @@
 import type { StringTableLocale } from "@s4tk/models/enums";
-import type { ResourceKeyPair } from "@s4tk/models/types";
+import type { Resource, ResourceKey } from "@s4tk/models/types";
+import { DiagnosticLevel, ValidationSchema } from "./enums";
 
-/**
- * How serious a diagnostic is. More serious levels have higher values.
- */
-export enum DiagnosticLevel {
-  Warning = 1,
-  Error = 2,
-  Fatal = 3
+//#region Private Types
+
+interface _ValidatedResourceBase {
+  readonly id: number;
+  schema: ValidationSchema;
+  key: ResourceKey;
+  resource: Resource;
+  modelLoaded: boolean;
+  diagnostics: DiagnosticInfo[];
 }
+
+//#endregion
+
+//#region Public Types
 
 /**
  * Diagnostic information for a resource entry.
  */
 export interface DiagnosticInfo {
+  readonly ownerId: number;
   level: DiagnosticLevel;
   message: string;
 }
 
 /**
- * Wrapper for a `ResourceKeyPair` and its diagnostic information.
+ * A resource validated with an unspecified schema.
  */
-export interface ValidatedEntry {
-  /** List of all diagnostics associated with `entry`. */
-  diagnostics: DiagnosticInfo[];
-
-  /** Entry to which the `diagnostics` apply. */
-  entry: ResourceKeyPair;
-
-  /** Whether or not `entry` has been parsed into the appropriate model. */
-  parsed: boolean;
+export interface ValidatedUnspecified extends _ValidatedResourceBase {
+  schema: ValidationSchema.Unspecified;
 }
 
 /**
- * Wrapper for a `ResourceKeyPair<StringTableResource>` with its locale and
- * diagnostic information.
+ * A resource validated with the `Tuning` schema.
  */
-export interface ValidatedStringTableEntry extends ValidatedEntry {
+export interface ValidatedTuning extends _ValidatedResourceBase {
+  schema: ValidationSchema.Tuning;
+  domValid: boolean;
+  pairedSimDataId?: number;
+}
+
+/**
+ * A resource validated with the `SimData` schema.
+ */
+export interface ValidatedSimData extends _ValidatedResourceBase {
+  schema: ValidationSchema.SimData;
+  pairedTuningId?: number;
+}
+
+/**
+ * A resource validated with the `StringTable` schema.
+ */
+export interface ValidatedStringTable extends _ValidatedResourceBase {
+  schema: ValidationSchema.StringTable;
   locale: StringTableLocale;
+  instanceBase: bigint;
+  primary: boolean;
+  otherLocaleIds: number[];
 }
 
 /**
- * Wrapper for a grouping of string tables that share the same instance base.
+ * A resource validated with some schema.
  */
-export interface ValidatedStringTableSet {
-  groupInstance: string;
-  stringTables: ValidatedStringTableEntry[];
-}
+export type ValidatedResource =
+  ValidatedUnspecified |
+  ValidatedTuning |
+  ValidatedSimData |
+  ValidatedStringTable;
 
 /**
- * Wrapper for a tuning and its paired SimData, if it has one. Pairing is
- * determined by instance.
+ * Validated resources organized by ID and schema.
  */
-export interface ValidatedTuningPair {
-  tuning: ValidatedEntry;
-  simdata?: ValidatedEntry;
+export interface OrganizedResources {
+  readonly ids: readonly ValidatedResource[];
+  readonly schemas: ReadonlyMap<ValidationSchema, readonly ValidatedResource[]>;
 }
 
-/**
- * Organized structure containing all diagnostic information for related
- * resource entries.
- */
-export interface ValidatedEntries {
-  pairedTunings: ValidatedTuningPair[];
-  stringTables: ValidatedStringTableSet[];
-  others: ValidatedEntry[];
-}
+//#endregion
