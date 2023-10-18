@@ -7,13 +7,28 @@ import { Diagnose, ItemCounter, loadModel } from "../helpers";
  * Validates an entry against the `StringTable` schema.
  * 
  * @param entry String table entry to validate
+ * @param allResources OrganizedResources object for reference
  */
-export default function validateStringTable(
+export function validateStringTable(
   entry: ValidatedStringTable,
   allResources: OrganizedResources
 ) {
   const stbl = loadModel("string table", entry, b => StringTableResource.from(b));
   if (stbl) _validateStandaloneStbl(entry, stbl);
+}
+
+/**
+ * Runs additional `StringTable` validation on an entry after all resources have
+ * been validated.
+ * 
+ * @param entry StringTable entry to post-validate
+ * @param allResources OrganizedResources object for reference
+ */
+export function postValidateStringTable(
+  entry: ValidatedStringTable,
+  allResources: OrganizedResources
+) {
+  // TODO:
 }
 
 //#region Helpers

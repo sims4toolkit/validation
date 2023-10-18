@@ -1,16 +1,19 @@
 import { SimDataResource, type RawResource, StringTableResource, XmlResource } from "@s4tk/models";
+import { BinaryResourceType } from "@s4tk/models/enums";
 import type { ResourceKeyPair } from "@s4tk/models/types";
-import type { ValidatedResource, ValidatedUnspecified } from "./types";
+import type { OrganizedResources, ValidatedResource, ValidatedUnspecified } from "./types";
 import organizeResources from "./organize-resources";
 import { ValidationSchema } from "./enums";
-import validateTuning from "./validation-schemas/tuning";
-import validateSimData from "./validation-schemas/simdata";
-import validateStringTable from "./validation-schemas/string-table";
-import { BinaryResourceType } from "@s4tk/models/enums";
+import { postValidateTuning, validateTuning } from "./validation-schemas/tuning";
+import { postValidateSimData, validateSimData } from "./validation-schemas/simdata";
+import { postValidateStringTable, validateStringTable } from "./validation-schemas/string-table";
 import { Diagnose } from "./helpers";
+import { UNSCANNABLE_TYPES } from "./constants";
 
 /**
- * TODO:
+ * Validates the given resources in relation to one another, returning a list of
+ * wrappers containing their diagnostic information. Any "IDs" referenced in
+ * validated resources refer to indices in the returned list.
  * 
  * @param resources List of resources to validate
  * @returns List of validated resources, organized by their unique ID
@@ -20,7 +23,23 @@ export default function validateResources(
 ): readonly ValidatedResource[] {
   const organized = organizeResources(resources);
 
+  _runInitialValidation(organized);
+  _runPostValidation(organized);
+
+  // TODO: repeated resource keys
+  // TODO: repeated tuning names
+  // TODO: repeated tuning instance
+  // TODO: tuning name doesn't match SimData name
+
+  return organized.ids;
+}
+
+//#region Helpers
+
+function _runInitialValidation(organized: OrganizedResources) {
   organized.ids.forEach(entry => {
+    if (UNSCANNABLE_TYPES.has(entry.key.type)) return;
+
     try {
       switch (entry.schema) {
         case ValidationSchema.Tuning:
@@ -36,13 +55,26 @@ export default function validateResources(
       Diagnose.warning(entry, "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
     }
   });
-
-  // TODO: global validation
-
-  return organized.ids;
 }
 
-//#region Helpers
+function _runPostValidation(organized: OrganizedResources) {
+  organized.ids.forEach(entry => {
+    if (UNSCANNABLE_TYPES.has(entry.key.type)) return;
+
+    try {
+      switch (entry.schema) {
+        case ValidationSchema.Tuning:
+          return postValidateTuning(entry, organized);
+        case ValidationSchema.SimData:
+          return postValidateSimData(entry, organized);
+        case ValidationSchema.StringTable:
+          return postValidateStringTable(entry, organized);
+      }
+    } catch (e) {
+      Diagnose.warning(entry, "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
+    }
+  });
+}
 
 function _tryValidateUnspecified(entry: ValidatedUnspecified) {
   try {

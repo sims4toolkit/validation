@@ -3,20 +3,37 @@ import { formatResourceType, formatResourceInstance } from "@s4tk/hashing/format
 import { XmlResource } from "@s4tk/models";
 import { TuningResourceType } from "@s4tk/models/enums";
 import type { OrganizedResources, ValidatedTuning } from "../types";
-import { BIT_RESTRICTIONS } from "../constants";
+import { BIT_RESTRICTIONS, REQUIRED_SIMDATAS } from "../constants";
 import { Diagnose, loadModel } from "../helpers";
 
 /**
  * Validates an entry against the `Tuning` schema.
  * 
  * @param entry Tuning entry to validate
+ * @param allResources OrganizedResources object for reference
  */
-export default function validateTuning(
+export function validateTuning(
   entry: ValidatedTuning,
   allResources: OrganizedResources
 ) {
   const tuning = loadModel("tuning", entry, b => XmlResource.from(b));
   if (tuning) _validateStandaloneTuning(entry, tuning);
+  const simdata = allResources.ids[entry.pairedSimDataId];
+  _validateTuningSimDataPair(entry, tuning, Boolean(simdata));
+}
+
+/**
+ * Runs additional `Tuning` validation on an entry after all resources have
+ * been validated.
+ * 
+ * @param entry Tuning entry to post-validate
+ * @param allResources OrganizedResources object for reference
+ */
+export function postValidateTuning(
+  entry: ValidatedTuning,
+  allResources: OrganizedResources
+) {
+  // TODO:
 }
 
 //#region Helpers
@@ -26,8 +43,7 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
     tuning.dom;
     entry.domValid = true;
   } catch (e) {
-    const errorMsg = e instanceof Error ? e.message : e as string;
-    Diagnose.fatal(entry, `Failed to parse XML DOM [${errorMsg}]`);
+    Diagnose.fatal(entry, "Failed to parse XML DOM.", e);
     return;
   }
 
@@ -46,8 +62,7 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
       Diagnose.error(entry, `Instance of ${formatResourceInstance(entry.key.instance)} does not match s="${s}".`);
     }
   } catch (e) {
-    const errorMsg = e instanceof Error ? e.message : e as string;
-    Diagnose.warning(entry, `Exception occurred while validating [${errorMsg}]`);
+    Diagnose.warning(entry, "Exception occurred while validating tuning.", e);
   }
 }
 
@@ -97,6 +112,21 @@ function _validateModuleTuning(entry: ValidatedTuning, tuning: XmlResource) {
   const expectedInstance = fnv64(n.replace(/\./g, "-")).toString();
   if (s !== expectedInstance) {
     Diagnose.error(entry, `Module tuning with n="${n}" must have s="${expectedInstance}", but found s="${s}" instead.`);
+  }
+}
+
+function _validateTuningSimDataPair(
+  entry: ValidatedTuning,
+  tuning: XmlResource | undefined,
+  hasSimData: boolean
+) {
+  if (hasSimData || !(tuning && entry.domValid)) return;
+  const { c, i } = tuning.root.attributes;
+  if (REQUIRED_SIMDATAS.types.has(i)) {
+    const tuningTypeName = TuningResourceType[entry.key.type] ?? "Unknown";
+    Diagnose.error(entry, `Tuning type ${tuningTypeName} (${formatResourceType(entry.key.type)}) is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
+  } else if (REQUIRED_SIMDATAS.classes.has(`${i}:${c}`)) {
+    Diagnose.error(entry, `Tuning class ${c} is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
   }
 }
 

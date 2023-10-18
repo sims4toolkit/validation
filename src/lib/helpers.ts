@@ -6,19 +6,20 @@ import { ValidatedResource } from "./types";
  * Utilities for adding diagnostics of any level.
  */
 export namespace Diagnose {
-  export function warning(entry: ValidatedResource, message: string) {
-    _diagnose(DiagnosticLevel.Warning, entry, message);
+  export function warning(entry: ValidatedResource, message: string, error?: Error | string) {
+    _diagnose(DiagnosticLevel.Warning, entry, message, error);
   }
 
-  export function error(entry: ValidatedResource, message: string) {
-    _diagnose(DiagnosticLevel.Error, entry, message);
+  export function error(entry: ValidatedResource, message: string, error?: Error | string) {
+    _diagnose(DiagnosticLevel.Error, entry, message, error);
   }
 
-  export function fatal(entry: ValidatedResource, message: string) {
-    _diagnose(DiagnosticLevel.Fatal, entry, message);
+  export function fatal(entry: ValidatedResource, message: string, error?: Error | string) {
+    _diagnose(DiagnosticLevel.Fatal, entry, message, error);
   }
 
-  function _diagnose(level: DiagnosticLevel, entry: ValidatedResource, message: string) {
+  function _diagnose(level: DiagnosticLevel, entry: ValidatedResource, message: string, error?: Error | string) {
+    if (error) message = `${message} [${error instanceof Error ? error.message : error}]`;
     entry.diagnostics.push({ ownerId: entry.id, level, message });
   }
 }
@@ -67,7 +68,6 @@ export function loadModel<T extends Resource>(
     entry.resource = model;
     return model;
   } catch (e) {
-    const errorMsg = e instanceof Error ? e.message : e as string;
-    Diagnose.fatal(entry, `Not a valid ${typeName} [${errorMsg}]`);
+    Diagnose.fatal(entry, `Not a valid ${typeName}.`, e);
   }
 }
