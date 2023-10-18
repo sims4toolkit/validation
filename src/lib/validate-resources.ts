@@ -23,13 +23,9 @@ export default function validateResources(
   resources: ResourceKeyPair<RawResource>[]
 ): readonly ValidatedResource[] {
   const organized = organizeResources(resources);
-
   _runInitialValidation(organized);
   _runPostValidation(organized);
   _validateMetaDataRepeats(organized);
-
-  // TODO: string table counts
-
   return organized.resources;
 }
 

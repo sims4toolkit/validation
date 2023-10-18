@@ -75,13 +75,23 @@ function _validateInstanceTuning(entry: ValidatedTuning, tuning: XmlResource) {
   }
 
   // checking bit restrictions
-  // TODO: check for personality traits somehow
   for (let i = 0; i < BIT_RESTRICTIONS.length; ++i) {
-    const { maxBits, maxValue, classNames } = BIT_RESTRICTIONS[i];
+    const { maxBits, maxValue, classNames, rootTests } = BIT_RESTRICTIONS[i];
     if (entry.key.instance <= maxValue) continue;
+
     if (classNames.has(c)) {
-      // FIXME: should be warning instead?
       Diagnose.error(entry, `${c} class is known to require ${maxBits}-bit instances (max value of ${maxValue}), but this one has an instance of ${entry.key.instance}.`);
+      break;
+    }
+
+    for (let j = 0; j < rootTests.length; ++j) {
+      const rootTest = rootTests[j];
+      try {
+        if (rootTest.fn(tuning.root)) {
+          Diagnose.error(entry, `${rootTest.pluralName} are known to require ${maxBits}-bit instances (max value of ${maxValue}), but this one has an instance of ${entry.key.instance}.`);
+          break;
+        }
+      } catch (_) { }
     }
   }
 

@@ -1,42 +1,62 @@
+import type { XmlNode } from "@s4tk/xml-dom";
+
 export const UNSCANNABLE_TYPES = new Set([
   0x02D5DF13, // ASM
   0x7FB6AD8A, // S4SMergedPackageManifest
 ]);
 
-export const BIT_RESTRICTIONS = [
-  {
-    maxBits: 31,
-    maxValue: 2147483647n,
-    classNames: new Set([
-      'DevelopmentalMilestone',
-    ]),
-  },
-  {
-    maxBits: 32,
-    maxValue: 4294967295n,
-    classNames: new Set([
-      'Preference',
-      'Reward',
-      'HouseholdReward',
-      'SimReward',
-      'RelationshipBit',
-      'SocialContextBit',
-      'Aspiration',
-      'AspirationAssignment',
-      'AspirationBasic',
-      'AspirationCareer',
-      'AspirationGig',
-      'AspirationFamilialTrigger',
-      'AspirationNotification',
-      'AspirationOrganizationTask',
-      'AspirationSimInfoPanel',
-      'AspirationWhimSet',
-      'ObjectivelessWhimSet',
-      'TimedAspiration',
-      'ZoneDirectorEventListener',
-    ]),
-  }
-];
+export const BIT_RESTRICTIONS: {
+  maxBits: number;
+  maxValue: bigint;
+  classNames: Set<string>;
+  rootTests: {
+    pluralName: string;
+    fn: (root: XmlNode) => boolean;
+  }[];
+}[] = [
+    {
+      maxBits: 31,
+      maxValue: 2147483647n,
+      classNames: new Set([
+        'DevelopmentalMilestone',
+      ]),
+      rootTests: []
+    },
+    {
+      maxBits: 32,
+      maxValue: 4294967295n,
+      classNames: new Set([
+        'Preference',
+        'Reward',
+        'HouseholdReward',
+        'SimReward',
+        'RelationshipBit',
+        'SocialContextBit',
+        'Aspiration',
+        'AspirationAssignment',
+        'AspirationBasic',
+        'AspirationCareer',
+        'AspirationGig',
+        'AspirationFamilialTrigger',
+        'AspirationNotification',
+        'AspirationOrganizationTask',
+        'AspirationSimInfoPanel',
+        'AspirationWhimSet',
+        'ObjectivelessWhimSet',
+        'TimedAspiration',
+        'ZoneDirectorEventListener',
+      ]),
+      rootTests: [
+        {
+          pluralName: "Personality traits",
+          fn(root) {
+            if (root.attributes.c !== "Trait") return false;
+            return root.findChild("trait_type").innerValue === "PERSONALITY";
+          }
+        }
+      ]
+    }
+  ];
 
 export const REQUIRED_SIMDATAS = {
   types: new Set([
