@@ -2,6 +2,7 @@
  * How serious a diagnostic is. More serious levels have higher int values.
  */
 export enum DiagnosticLevel {
+  Info = 0,
   Warning = 1,
   Error = 2,
   Fatal = 3,

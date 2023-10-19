@@ -6,6 +6,10 @@ import { ValidatedResource } from "./types";
  * Utilities for adding diagnostics of any level.
  */
 export namespace Diagnose {
+  export function info(entry: ValidatedResource, message: string, error?: Error | string) {
+    _diagnose(DiagnosticLevel.Info, entry, message, error);
+  }
+
   export function warning(entry: ValidatedResource, message: string, error?: Error | string) {
     _diagnose(DiagnosticLevel.Warning, entry, message, error);
   }

@@ -37,7 +37,7 @@ export function postValidateSimData(
     const tuningName = (tuning.resource as XmlResource).root.name;
     const simdataName = (entry.resource as SimDataResource).instance.name;
     if (tuningName !== simdataName) {
-      Diagnose.warning(entry, `Expected SimData name to match tuning name of "${tuningName}", but found "${simdataName}". This has no effect on gameplay and may be ignored.`);
+      Diagnose.info(entry, `Expected SimData name to match tuning name of "${tuningName}", but found "${simdataName}".`);
     }
   }
 }
@@ -73,7 +73,7 @@ function _validateUnusedFlags(
 ) {
   if (!(simdata && tuning)) return;
   if (simdata.unused !== tuning.key.group) {
-    Diagnose.warning(entry, `Expected SimData's flags to match paired tuning's group of ${formatResourceGroup(tuning.key.group)}, but found u="${formatAsHexString(simdata.unused, 8, true)}" instead. This has no effect on gameplay and may be ignored.`);
+    Diagnose.info(entry, `Expected u attribute to match paired tuning's group of ${formatResourceGroup(tuning.key.group)}, but found u="${formatAsHexString(simdata.unused, 8, true)}" instead.`);
   }
 }
 
