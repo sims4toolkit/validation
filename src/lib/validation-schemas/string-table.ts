@@ -39,10 +39,12 @@ export function postValidateStringTable(
     const primaryLocaleName = StringTableLocale[primaryEntry.locale] ?? "Unknown";
     if (stbl.size < primaryStbl.size) {
       const diff = primaryStbl.size - stbl.size;
-      Diagnose.warning(entry, "STB_001", `Missing ${diff} strings from paired ${primaryLocaleName} string table.`);
+      const stringText = diff === 1 ? "string" : "strings";
+      Diagnose.warning(entry, "STB_001", `Missing ${diff} ${stringText} from paired ${primaryLocaleName} string table.`);
     } else if (stbl.size > primaryStbl.size) {
       const diff = stbl.size - primaryStbl.size;
-      Diagnose.warning(entry, "STB_001", `Contains ${diff} more strings than paired ${primaryLocaleName} string table.`);
+      const stringText = diff === 1 ? "string" : "strings";
+      Diagnose.warning(entry, "STB_001", `Contains ${diff} more ${stringText} than paired ${primaryLocaleName} string table.`);
     }
   });
 }
