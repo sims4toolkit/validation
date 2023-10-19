@@ -43,7 +43,7 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
     tuning.dom;
     entry.domValid = true;
   } catch (e) {
-    Diagnose.fatal(entry, "Failed to parse XML DOM.", e);
+    Diagnose.fatal(entry, "TUN_001", "Failed to parse XML DOM.", e);
     return;
   }
 
@@ -53,16 +53,16 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
     } else if (tuning.root.tag === "M") {
       _validateModuleTuning(entry, tuning);
     } else {
-      Diagnose.fatal(entry, `<${tuning.root.tag}> is not a valid root node in XML tuning.`);
+      Diagnose.fatal(entry, "TUN_002", `<${tuning.root.tag}> is not a valid root node in XML tuning.`);
       return;
     }
 
     const { s } = tuning.root.attributes;
-    if (entry.key.instance.toString() !== s) {
-      Diagnose.error(entry, `Instance of ${formatResourceInstance(entry.key.instance)} does not match s="${s}".`);
+    if ((s !== undefined) && (entry.key.instance.toString() !== s)) {
+      Diagnose.error(entry, "TUN_003", `Instance of ${formatResourceInstance(entry.key.instance)} does not match s="${s}".`);
     }
   } catch (e) {
-    Diagnose.warning(entry, "Exception occurred while validating tuning.", e);
+    Diagnose.warning(entry, "Unknown", "Exception occurred while validating tuning.", e);
   }
 }
 
@@ -70,7 +70,7 @@ function _validateInstanceTuning(entry: ValidatedTuning, tuning: XmlResource) {
   const { c, i, m, n, s } = tuning.root.attributes;
 
   if (!(c && i && m && n && s)) {
-    Diagnose.error(entry, "Instance tuning must contain all c, i, m, n, and s attributes.");
+    Diagnose.error(entry, "TUN_004", "Instance tuning must contain all c, i, m, n, and s attributes.");
     return;
   }
 
@@ -80,7 +80,7 @@ function _validateInstanceTuning(entry: ValidatedTuning, tuning: XmlResource) {
     if (entry.key.instance <= maxValue) continue;
 
     if (classNames.has(c)) {
-      Diagnose.error(entry, `${c} class is known to require ${maxBits}-bit instances (max value of ${maxValue}), but this one has an instance of ${entry.key.instance}.`);
+      Diagnose.error(entry, "TUN_005", `${c} class is known to require ${maxBits}-bit instances (max value of ${maxValue}), but this one has an instance of ${entry.key.instance}.`);
       break;
     }
 
@@ -88,7 +88,7 @@ function _validateInstanceTuning(entry: ValidatedTuning, tuning: XmlResource) {
       const rootTest = rootTests[j];
       try {
         if (rootTest.fn(tuning.root)) {
-          Diagnose.error(entry, `${rootTest.pluralName} are known to require ${maxBits}-bit instances (max value of ${maxValue}), but this one has an instance of ${entry.key.instance}.`);
+          Diagnose.error(entry, "TUN_005", `${rootTest.pluralName} are known to require ${maxBits}-bit instances (max value of ${maxValue}), but this one has an instance of ${entry.key.instance}.`);
           break;
         }
       } catch (_) { }
@@ -98,11 +98,11 @@ function _validateInstanceTuning(entry: ValidatedTuning, tuning: XmlResource) {
   // checking type and i
   const typeFromI = TuningResourceType.parseAttr(i);
   if (typeFromI === TuningResourceType.Tuning) {
-    Diagnose.warning(entry, `Unrecognized instance type of i="${i}". If you are sure this is correct, then S4TK might need to be updated.`);
+    Diagnose.warning(entry, "TUN_006", `Unrecognized instance type of i="${i}". If you are sure this is correct, then S4TK might need to be updated.`);
   } else if (typeFromI !== entry.key.type) {
     const foundName = TuningResourceType[entry.key.type] ?? "Unknown";
     const expectedName = TuningResourceType[typeFromI];
-    Diagnose.error(entry, `Expected instance tuning with i="${i}" to have a type of ${expectedName} (${formatResourceType(typeFromI)}), but found ${foundName} (${formatResourceType(entry.key.type)}).`);
+    Diagnose.error(entry, "TUN_007", `Expected instance tuning with i="${i}" to have a type of ${expectedName} (${formatResourceType(typeFromI)}), but found ${foundName} (${formatResourceType(entry.key.type)}).`);
   }
 }
 
@@ -111,17 +111,17 @@ function _validateModuleTuning(entry: ValidatedTuning, tuning: XmlResource) {
 
   if (entry.key.type !== TuningResourceType.Tuning) {
     const foundName = TuningResourceType[entry.key.type] ?? "Unknown";
-    Diagnose.error(entry, `Expected module tuning to have a type of Tuning (${formatResourceType(TuningResourceType.Tuning)}), but found ${foundName} (${formatResourceType(entry.key.type)}).`);
+    Diagnose.error(entry, "TUN_008", `Expected module tuning to have a type of Tuning (${formatResourceType(TuningResourceType.Tuning)}), but found ${foundName} (${formatResourceType(entry.key.type)}).`);
   }
 
   if (!(n && s)) {
-    Diagnose.error(entry, "Module tuning must contain both n and s attributes.");
+    Diagnose.error(entry, "TUN_010", "Module tuning must contain both n and s attributes.");
     return;
   }
 
   const expectedInstance = fnv64(n.replace(/\./g, "-")).toString();
   if (s !== expectedInstance) {
-    Diagnose.error(entry, `Module tuning with n="${n}" must have s="${expectedInstance}", but found s="${s}" instead.`);
+    Diagnose.error(entry, "TUN_009", `Module tuning with n="${n}" must have s="${expectedInstance}", but found s="${s}" instead.`);
   }
 }
 
@@ -134,9 +134,9 @@ function _validateTuningSimDataPair(
   const { c, i } = tuning.root.attributes;
   if (REQUIRED_SIMDATAS.types.has(i)) {
     const tuningTypeName = TuningResourceType[entry.key.type] ?? "Unknown";
-    Diagnose.error(entry, `Tuning type ${tuningTypeName} (${formatResourceType(entry.key.type)}) is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
+    Diagnose.error(entry, "TUN_011", `Tuning type ${tuningTypeName} (${formatResourceType(entry.key.type)}) is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
   } else if (REQUIRED_SIMDATAS.classes.has(`${i}:${c}`)) {
-    Diagnose.error(entry, `Tuning class ${c} is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
+    Diagnose.error(entry, "TUN_011", `Tuning class ${c} is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
   }
 }
 

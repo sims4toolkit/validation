@@ -39,10 +39,10 @@ export function postValidateStringTable(
     const primaryLocaleName = StringTableLocale[primaryEntry.locale] ?? "Unknown";
     if (stbl.size < primaryStbl.size) {
       const diff = primaryStbl.size - stbl.size;
-      Diagnose.warning(entry, `Missing ${diff} strings from paired ${primaryLocaleName} string table.`);
+      Diagnose.warning(entry, "STB_001", `Missing ${diff} strings from paired ${primaryLocaleName} string table.`);
     } else if (stbl.size > primaryStbl.size) {
       const diff = stbl.size - primaryStbl.size;
-      Diagnose.warning(entry, `Contains ${diff} more strings than paired ${primaryLocaleName} string table.`);
+      Diagnose.warning(entry, "STB_001", `Contains ${diff} more strings than paired ${primaryLocaleName} string table.`);
     }
   });
 }
@@ -51,14 +51,14 @@ export function postValidateStringTable(
 
 function _validateStandaloneStbl(entry: ValidatedStringTable, stbl: StringTableResource) {
   if (!(entry.locale in StringTableLocale)) {
-    Diagnose.fatal(entry, `Locale of ${formatAsHexString(entry.locale, 2, true)} is not recognized; this string table will never be loaded.`);
+    Diagnose.fatal(entry, "STB_002", `Locale of ${formatAsHexString(entry.locale, 2, true)} is not recognized; this string table will never be loaded.`);
   }
 
   if (entry.primary) {
     const missingLocales = 17 - entry.otherLocaleIds.length;
     if (missingLocales > 0) {
       const pl = missingLocales === 1 ? "" : "s";
-      Diagnose.warning(entry, `Missing string table${pl} for ${missingLocales} locale${pl}. Text will be blank in these languages.`);
+      Diagnose.info(entry, "STB_003", `Missing string table${pl} for ${missingLocales} locale${pl}. Text will be blank in these languages.`);
     }
   }
 
@@ -69,18 +69,18 @@ function _validateStandaloneStbl(entry: ValidatedStringTable, stbl: StringTableR
     valueCounter.count(value);
   });
   keyCounter.forEach(2, (key, count) => {
-    Diagnose.error(entry, `The key ${formatStringKey(key)} is in use by ${count} strings.`);
+    Diagnose.error(entry, "STB_004", `The key ${formatStringKey(key)} is in use by ${count} strings.`);
   });
   valueCounter.forEach(2, (value, count) => {
-    Diagnose.warning(entry, `The value "${value}" appears in ${count} strings.`);
+    Diagnose.info(entry, "STB_005", `The value "${value}" appears in ${count} strings.`);
   });
 
   if (stbl.hasKey(0)) {
-    Diagnose.warning(entry, "At least one string has the key 0x00000000.");
+    Diagnose.warning(entry, "STB_006", "At least one string has the key 0x00000000.");
   }
 
   if (stbl.hasKey(0x811C9DC5)) {
-    Diagnose.warning(entry, "At least one string has the key 0x811C9DC5 (the FNV-32 hash of an empty string).");
+    Diagnose.warning(entry, "STB_007", "At least one string has the key 0x811C9DC5 (the FNV-32 hash of an empty string).");
   }
 }
 

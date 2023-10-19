@@ -69,18 +69,18 @@ function _runInitialValidation(organized: OrganizedResources) {
           return _tryValidateUnspecified(entry);
       }
     } catch (e) {
-      Diagnose.warning(entry, "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
+      Diagnose.warning(entry, "Unknown", "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
     }
   });
 }
 
 function _validateReservedInstances(entry: ValidatedResource) {
   if (entry.key.instance === 0n) {
-    Diagnose.error(entry, "Resources cannot have an instance of 0.");
+    Diagnose.error(entry, "GEN_002", "Resources cannot have an instance of 0.");
   } else if (entry.key.instance === 0x811C9DC5n) {
-    Diagnose.warning(entry, "Instance is 0x811C9DC5 (the FNV-32 hash of an empty string).");
+    Diagnose.warning(entry, "GEN_003", "Instance is 0x811C9DC5 (the FNV-32 hash of an empty string).");
   } else if (entry.key.instance === 0xCBF29CE484222325n) {
-    Diagnose.warning(entry, "Instance is 0xCBF29CE484222325 (the FNV-64 hash of an empty string).");
+    Diagnose.warning(entry, "GEN_003", "Instance is 0xCBF29CE484222325 (the FNV-64 hash of an empty string).");
   }
 }
 
@@ -96,7 +96,7 @@ function _runPostValidation(organized: OrganizedResources) {
           return postValidateStringTable(entry, organized);
       }
     } catch (e) {
-      Diagnose.warning(entry, "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
+      Diagnose.warning(entry, "Unknown", "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
     }
   });
 }
@@ -109,18 +109,18 @@ function _tryValidateUnspecified(entry: ValidatedUnspecified) {
     if (magic === "DATA" && entry.key.type !== BinaryResourceType.CombinedTuning) {
       entry.resource = SimDataResource.from(buffer);
       entry.modelLoaded = true;
-      Diagnose.error(entry, "File appears to be a SimData, but is not using the SimData type (545AC67A). No further validation will be done.");
+      Diagnose.error(entry, "DAT_006", "File appears to be a SimData, but is not using the SimData type (545AC67A). No further validation will be done.");
     } else if (magic === "STBL") {
       entry.resource = StringTableResource.from(buffer);
       entry.modelLoaded = true;
-      Diagnose.error(entry, "File appears to be a string table, but is not using the string table type (220557DA). No further validation will be done.");
+      Diagnose.error(entry, "STB_008", "File appears to be a string table, but is not using the string table type (220557DA). No further validation will be done.");
     } else if (magic.trimStart().startsWith("<")) {
       const xml = XmlResource.from(buffer);
       xml.root;
       entry.resource = xml;
       entry.modelLoaded = true;
       if (xml.root.tag === "I" || xml.root.tag === "M") {
-        Diagnose.warning(entry, "File appears to be XML tuning, but is not using a recognized tuning type. If you are sure this file's type is correct, S4TK may need to be updated. No further validation will be done.");
+        Diagnose.warning(entry, "TUN_012", "File appears to be XML tuning, but is not using a recognized tuning type. If you are sure this file's type is correct, S4TK may need to be updated. No further validation will be done.");
       }
     }
   } catch (_) { }
@@ -145,20 +145,20 @@ function _validateMetaDataRepeats(organized: OrganizedResources) {
     const key = formatResourceKey(entry.key, "-");
     const resourceKeyCount = resourceKeys.get(key);
     if (resourceKeyCount > 1) {
-      Diagnose.error(entry, `Key of ${key} is being used by ${resourceKeyCount} files. One will overwrite the others, and S4S will glitch while handling them.`);
+      Diagnose.error(entry, "GEN_004", `Key of ${key} is being used by ${resourceKeyCount} files. One will overwrite the others, and S4S will glitch while handling them.`);
     }
 
     if (entry.schema === ValidationSchema.Tuning) {
       const idCount = tuningIds.get(entry.key.instance);
       if (idCount > 2) {
-        Diagnose.warning(entry, `Instance of ${entry.key.instance} is being used by ${idCount} tuning files.`);
+        Diagnose.warning(entry, "TUN_013", `Instance of ${entry.key.instance} is being used by ${idCount} tuning files.`);
       }
 
       if (entry.domValid && (entry.resource as XmlResource).root.name) {
         const filename = (entry.resource as XmlResource).root.name;
         const nameCount = tuningNames.get(filename);
         if (nameCount > 2) {
-          Diagnose.warning(entry, `Name of "${filename}" is being used by ${nameCount} tuning files.`);
+          Diagnose.warning(entry, "TUN_014", `Name of "${filename}" is being used by ${nameCount} tuning files.`);
         }
       }
     }

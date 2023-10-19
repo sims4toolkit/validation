@@ -1,6 +1,7 @@
 import type { StringTableLocale } from "@s4tk/models/enums";
 import type { Resource, ResourceKey } from "@s4tk/models/types";
 import { DiagnosticLevel, ValidationSchema } from "./enums";
+import DiagnosticCode from "./diagnostic-code";
 
 //#region Private Types
 
@@ -22,6 +23,7 @@ interface _ValidatedResourceBase {
  */
 export interface DiagnosticInfo {
   readonly ownerId: number;
+  code: DiagnosticCode;
   level: DiagnosticLevel;
   message: string;
 }

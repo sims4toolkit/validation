@@ -1,30 +1,31 @@
 import { Resource } from "@s4tk/models/types";
 import { DiagnosticLevel } from "./enums";
 import { ValidatedResource } from "./types";
+import DiagnosticCode from "./diagnostic-code";
 
 /**
  * Utilities for adding diagnostics of any level.
  */
 export namespace Diagnose {
-  export function info(entry: ValidatedResource, message: string, error?: Error | string) {
-    _diagnose(DiagnosticLevel.Info, entry, message, error);
+  export function info(entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
+    _diagnose(DiagnosticLevel.Info, entry, code, message, error);
   }
 
-  export function warning(entry: ValidatedResource, message: string, error?: Error | string) {
-    _diagnose(DiagnosticLevel.Warning, entry, message, error);
+  export function warning(entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
+    _diagnose(DiagnosticLevel.Warning, entry, code, message, error);
   }
 
-  export function error(entry: ValidatedResource, message: string, error?: Error | string) {
-    _diagnose(DiagnosticLevel.Error, entry, message, error);
+  export function error(entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
+    _diagnose(DiagnosticLevel.Error, entry, code, message, error);
   }
 
-  export function fatal(entry: ValidatedResource, message: string, error?: Error | string) {
-    _diagnose(DiagnosticLevel.Fatal, entry, message, error);
+  export function fatal(entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
+    _diagnose(DiagnosticLevel.Fatal, entry, code, message, error);
   }
 
-  function _diagnose(level: DiagnosticLevel, entry: ValidatedResource, message: string, error?: Error | string) {
+  function _diagnose(level: DiagnosticLevel, entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
     if (error) message = `${message} [${error instanceof Error ? error.message : error}]`;
-    entry.diagnostics.push({ ownerId: entry.id, level, message });
+    entry.diagnostics.push({ ownerId: entry.id, code, level, message });
   }
 }
 
@@ -72,6 +73,6 @@ export function loadModel<T extends Resource>(
     entry.resource = model;
     return model;
   } catch (e) {
-    Diagnose.fatal(entry, `Not a valid ${typeName}.`, e);
+    Diagnose.fatal(entry, "GEN_001", `Not a valid ${typeName}.`, e);
   }
 }
