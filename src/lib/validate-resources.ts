@@ -1,15 +1,35 @@
-import { SimDataResource, type RawResource, StringTableResource, XmlResource } from "@s4tk/models";
+import { formatResourceKey } from "@s4tk/hashing/formatting";
+import { SimDataResource, type RawResource, StringTableResource, XmlResource, Package } from "@s4tk/models";
 import { BinaryResourceType } from "@s4tk/models/enums";
 import type { ResourceKeyPair } from "@s4tk/models/types";
 import type { OrganizedResources, ValidatedResource, ValidatedUnspecified } from "./types";
-import organizeResources from "./organize-resources";
-import { ValidationSchema } from "./enums";
-import { postValidateTuning, validateTuning } from "./validation-schemas/tuning";
+import { validateTuning } from "./validation-schemas/tuning";
 import { postValidateSimData, validateSimData } from "./validation-schemas/simdata";
 import { postValidateStringTable, validateStringTable } from "./validation-schemas/string-table";
+import organizeResources from "./organize-resources";
 import { Diagnose, ItemCounter } from "./helpers";
 import { UNSCANNABLE_TYPES } from "./constants";
-import { formatResourceKey } from "@s4tk/hashing/formatting";
+import { ValidationSchema } from "./enums";
+
+/**
+ * Validates the resources in the given package in relation to one another,
+ * returning a list of wrappers containing their diagnostic information. Any
+ * "IDs" referenced in validated resources refer to indices in the returned
+ * list.
+ * 
+ * @param buffer Buffer to read package data from
+ */
+export function validatePackageBuffer(
+  buffer: Buffer
+): readonly ValidatedResource[] {
+  const entries = Package.extractResources<RawResource>(buffer, {
+    decompressBuffers: true,
+    keepDeletedRecords: true,
+    loadRaw: true,
+  });
+
+  return validateResources(entries);
+}
 
 /**
  * Validates the given resources in relation to one another, returning a list of
@@ -19,7 +39,7 @@ import { formatResourceKey } from "@s4tk/hashing/formatting";
  * @param resources List of resources to validate
  * @returns List of validated resources, organized by their unique ID
  */
-export default function validateResources(
+export function validateResources(
   resources: ResourceKeyPair<RawResource>[]
 ): readonly ValidatedResource[] {
   const organized = organizeResources(resources);
@@ -70,8 +90,6 @@ function _runPostValidation(organized: OrganizedResources) {
 
     try {
       switch (entry.schema) {
-        case ValidationSchema.Tuning:
-          return postValidateTuning(entry, organized);
         case ValidationSchema.SimData:
           return postValidateSimData(entry, organized);
         case ValidationSchema.StringTable:

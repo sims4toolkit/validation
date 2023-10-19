@@ -1,12 +1,18 @@
+export {
+  DiagnosticLevel,
+  ValidationSchema,
+} from "./lib/enums";
+
 export type {
   DiagnosticInfo,
-  ValidatedEntries,
-  ValidatedEntry,
-  ValidatedStringTableSet,
-  ValidatedTuningPair
+  ValidatedUnspecified,
+  ValidatedTuning,
+  ValidatedSimData,
+  ValidatedStringTable,
+  ValidatedResource
 } from "./lib/types";
 
 export {
-  validateEntries,
+  validateResources,
   validatePackageBuffer
-} from "./lib/validate-entries";
+} from "./lib/validate-resources";
