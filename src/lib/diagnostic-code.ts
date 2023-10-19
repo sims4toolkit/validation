@@ -1,3 +1,9 @@
+type CodePrefix =
+  "GEN" |
+  "TUN" |
+  "DAT" |
+  "STB";
+
 type GeneralCode =
   "GEN_001" |
   "GEN_002" |
@@ -84,6 +90,24 @@ namespace DiagnosticCode {
     "STB_007": "String table has string with key equal to FNV hash of empty string.",
     "STB_008": "Suspected string table not using the StringTable type (220557DA).",
   };
+
+  /**
+   * Returns a list of all DiagnosticCodes with the given prefix. If none is
+   * provided, then all are returned.
+   * 
+   * @param prefix Prefix to restrict results by
+   */
+  export function getAll(prefix?: CodePrefix): readonly DiagnosticCode[] {
+    const codes: string[] = [];
+
+    for (const code in _CODE_BRIEFS) {
+      if (!prefix || code.startsWith(prefix)) {
+        codes.push(code);
+      }
+    }
+
+    return codes as DiagnosticCode[];
+  }
 
   /**
    * Returns brief, plain English description of error code.
