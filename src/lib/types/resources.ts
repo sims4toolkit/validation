@@ -11,6 +11,7 @@ interface _ValidatedResourceBase {
   resource: Resource;
   modelLoaded: boolean;
   diagnostics: DiagnosticInfo[];
+  isDeleted?: boolean;
 }
 
 //#endregion

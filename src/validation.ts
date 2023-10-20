@@ -1,6 +1,11 @@
 //#region Enums
 
-export { DiagnosticCode, DiagnosticLevel } from "./lib/types/diagnostics";
+export {
+  DiagnosticCode,
+  DiagnosticInfo,
+  DiagnosticLevel,
+} from "./lib/types/diagnostics";
+
 export { ValidationSchema } from "./lib/types/resources";
 
 //#endregion

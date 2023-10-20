@@ -1,6 +1,6 @@
 import { formatResourceKey } from "@s4tk/hashing/formatting";
 import { SimDataResource, type RawResource, StringTableResource, XmlResource, Package } from "@s4tk/models";
-import { BinaryResourceType } from "@s4tk/models/enums";
+import { BinaryResourceType, EncodingType } from "@s4tk/models/enums";
 import type { ResourceKeyPair } from "@s4tk/models/types";
 import organizeResources from "./organize";
 import type { OrganizedResources, ValidatedResource, ValidatedUnspecified } from "./types/resources";
@@ -57,6 +57,12 @@ function _runInitialValidation(organized: OrganizedResources) {
     if (UNSCANNABLE_TYPES.has(entry.key.type)) return;
 
     _validateReservedInstances(entry);
+
+    // do not scan deleted records
+    if (entry.resource.encodingType === EncodingType.Null) {
+      entry.isDeleted = true;
+      return;
+    }
 
     try {
       switch (entry.schema) {
