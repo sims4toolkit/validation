@@ -2,7 +2,7 @@ import { formatResourceKey } from "@s4tk/hashing/formatting";
 import { SimDataResource, type RawResource, StringTableResource, XmlResource, Package } from "@s4tk/models";
 import { BinaryResourceType } from "@s4tk/models/enums";
 import type { ResourceKeyPair } from "@s4tk/models/types";
-import organizeResources from "./organize-resources";
+import organizeResources from "./organize";
 import type { OrganizedResources, ValidatedResource, ValidatedUnspecified } from "./types/resources";
 import { ValidationSchema } from "./types/resources";
 import { UNSCANNABLE_TYPES } from "./utils/constants";

@@ -22,6 +22,6 @@ export type {
 export {
   validatePackageBuffer,
   validateResources,
-} from "./lib/validate-resources";
+} from "./lib/validate";
 
 //#endregion
