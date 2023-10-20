@@ -1,7 +1,7 @@
 import { Resource } from "@s4tk/models/types";
 import { DiagnosticLevel } from "./enums";
 import { ValidatedResource } from "./types";
-import DiagnosticCode from "./diagnostic-code";
+import { DiagnosticCode } from "./diagnostic-code";
 
 /**
  * Utilities for adding diagnostics of any level.
