@@ -59,7 +59,7 @@ export const BIT_RESTRICTIONS: {
   ];
 
 export const REQUIRED_SIMDATAS = {
-  types: new Set([
+  alwaysTypes: new Set([
     "achievement",
     "achievement_category",
     "achievement_collection",
@@ -109,7 +109,7 @@ export const REQUIRED_SIMDATAS = {
     "weather_forecast",
     "zone_modifier"
   ]),
-  classes: new Set([
+  alwaysClasses: new Set([
     "aspiration:Aspiration",
     "aspiration:AspirationAssignment",
     "aspiration:AspirationCareer",
@@ -123,6 +123,26 @@ export const REQUIRED_SIMDATAS = {
     "career_gig:HomeAssignmentGig",
     "career_gig:RabbitholeGig",
     "drama_node:MajorOrganizationEventDramaNode",
+    "object:Aquarium",
+    "object:Baby",
+    "object:Door",
+    "object:Fire",
+    "object:FireSprinklerHead",
+    "object:Fish",
+    "object:FishBowl",
+    "object:HalfWall",
+    "object:Jig",
+    "object:Ocean",
+    "object:Pond",
+    "object:PoolSeat",
+    "object:PrototypeObject",
+    "object:Puddle",
+    "object:Rug",
+    "object:SectionalSofa",
+    "object:SectionalSofaPiece",
+    "object:Sim",
+    "object:SwimmingPool",
+    "object:Terrain",
     "recipe:MusicRecipe",
     "recipe:PaintByReferenceRecipe",
     "recipe:PaintingRecipe",
@@ -149,5 +169,8 @@ export const REQUIRED_SIMDATAS = {
     "statistic:RankedStatistic",
     "statistic:Skill",
     "statistic:Statistic"
+  ]),
+  sometimesClasses: new Set([
+    "object:GameObject"
   ]),
 };

@@ -133,11 +133,13 @@ function _validateTuningSimDataPair(
 ) {
   if (hasSimData || !(tuning && entry.domValid)) return;
   const { c, i } = tuning.root.attributes;
-  if (REQUIRED_SIMDATAS.types.has(i)) {
+  if (REQUIRED_SIMDATAS.alwaysTypes.has(i)) {
     const tuningTypeName = TuningResourceType[entry.key.type] ?? "Unknown";
     Diagnose.error(entry, "TUN_011", `Tuning type ${tuningTypeName} (${formatResourceType(entry.key.type)}) is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
-  } else if (REQUIRED_SIMDATAS.classes.has(`${i}:${c}`)) {
+  } else if (REQUIRED_SIMDATAS.alwaysClasses.has(`${i}:${c}`)) {
     Diagnose.error(entry, "TUN_011", `Tuning class ${c} is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
+  } else if (REQUIRED_SIMDATAS.sometimesClasses.has(`${i}:${c}`)) {
+    Diagnose.warning(entry, "TUN_015", `Tuning class ${c} sometimes requires SimData. If functioning as expected, no action is needed.`);
   }
 }
 
