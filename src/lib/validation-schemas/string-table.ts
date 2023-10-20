@@ -53,7 +53,7 @@ export function postValidateStringTable(
 
 function _validateStandaloneStbl(entry: ValidatedStringTable, stbl: StringTableResource) {
   if (!(entry.locale in StringTableLocale)) {
-    Diagnose.fatal(entry, "STB_002", `Locale of ${formatAsHexString(entry.locale, 2, true)} is not recognized; this string table will never be loaded.`);
+    Diagnose.error(entry, "STB_002", `Locale of ${formatAsHexString(entry.locale, 2, true)} is not recognized; this string table will never be loaded.`);
   }
 
   if (entry.primary) {
