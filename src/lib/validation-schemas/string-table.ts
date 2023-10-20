@@ -1,8 +1,10 @@
 import { formatAsHexString, formatStringKey } from "@s4tk/hashing/formatting";
 import { StringTableResource } from "@s4tk/models";
-import type { OrganizedResources, ValidatedStringTable } from "../types";
-import { Diagnose, ItemCounter, loadModel } from "../helpers";
 import { StringTableLocale } from "@s4tk/models/enums";
+import type { OrganizedResources, ValidatedStringTable } from "../types/resources";
+import Diagnose from "../utils/diagnose";
+import ItemCounter from "../utils/item-counter";
+import { loadModel } from "./helpers";
 
 /**
  * Validates an entry against the `StringTable` schema.

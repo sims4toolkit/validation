@@ -1,8 +1,9 @@
-import { SimDataResource, XmlResource } from "@s4tk/models";
-import type { OrganizedResources, ValidatedResource, ValidatedSimData, ValidatedTuning } from "../types";
-import { Diagnose, loadModel } from "../helpers";
-import { SimDataGroup, TuningResourceType } from "@s4tk/models/enums";
 import { formatAsHexString, formatResourceGroup, formatResourceType } from "@s4tk/hashing/formatting";
+import { SimDataResource, XmlResource } from "@s4tk/models";
+import { SimDataGroup, TuningResourceType } from "@s4tk/models/enums";
+import type { OrganizedResources, ValidatedResource, ValidatedSimData, ValidatedTuning } from "../types/resources";
+import Diagnose from "../utils/diagnose";
+import { loadModel } from "./helpers";
 
 /**
  * Validates an entry against the `SimData` schema.

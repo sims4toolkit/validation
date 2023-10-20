@@ -1,20 +1,27 @@
-export { DiagnosticCode } from "./lib/diagnostic-code";
+//#region Enums
 
-export {
-  DiagnosticLevel,
-  ValidationSchema,
-} from "./lib/enums";
+export { DiagnosticCode, DiagnosticLevel } from "./lib/types/diagnostics";
+export { ValidationSchema } from "./lib/types/resources";
+
+//#endregion
+
+//#region Types
 
 export type {
-  DiagnosticInfo,
-  ValidatedUnspecified,
-  ValidatedTuning,
+  ValidatedResource,
   ValidatedSimData,
   ValidatedStringTable,
-  ValidatedResource
-} from "./lib/types";
+  ValidatedTuning,
+  ValidatedUnspecified,
+} from "./lib/types/resources";
+
+//#endregion
+
+//#region Functions
 
 export {
+  validatePackageBuffer,
   validateResources,
-  validatePackageBuffer
 } from "./lib/validate-resources";
+
+//#endregion

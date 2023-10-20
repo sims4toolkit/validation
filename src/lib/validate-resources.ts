@@ -2,14 +2,15 @@ import { formatResourceKey } from "@s4tk/hashing/formatting";
 import { SimDataResource, type RawResource, StringTableResource, XmlResource, Package } from "@s4tk/models";
 import { BinaryResourceType } from "@s4tk/models/enums";
 import type { ResourceKeyPair } from "@s4tk/models/types";
-import type { OrganizedResources, ValidatedResource, ValidatedUnspecified } from "./types";
-import { validateTuning } from "./validation-schemas/tuning";
+import organizeResources from "./organize-resources";
+import type { OrganizedResources, ValidatedResource, ValidatedUnspecified } from "./types/resources";
+import { ValidationSchema } from "./types/resources";
+import { UNSCANNABLE_TYPES } from "./utils/constants";
+import Diagnose from "./utils/diagnose";
+import ItemCounter from "./utils/item-counter";
 import { postValidateSimData, validateSimData } from "./validation-schemas/simdata";
 import { postValidateStringTable, validateStringTable } from "./validation-schemas/string-table";
-import organizeResources from "./organize-resources";
-import { Diagnose, ItemCounter } from "./helpers";
-import { UNSCANNABLE_TYPES } from "./constants";
-import { ValidationSchema } from "./enums";
+import { validateTuning } from "./validation-schemas/tuning";
 
 /**
  * Validates the resources in the given package in relation to one another,

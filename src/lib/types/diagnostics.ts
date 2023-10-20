@@ -1,3 +1,5 @@
+//#region Private Code Types
+
 type CodePrefix =
   "GEN" |
   "TUN" |
@@ -43,6 +45,30 @@ type StringTableCode =
   "STB_006" |
   "STB_007" |
   "STB_008";
+
+//#endregion
+
+//#region Public Types
+
+/**
+* How serious a diagnostic is. More serious levels have higher int values.
+*/
+export enum DiagnosticLevel {
+  Info = 0,
+  Warning = 1,
+  Error = 2,
+  Fatal = 3,
+}
+
+/**
+ * Diagnostic information for a resource entry.
+ */
+export interface DiagnosticInfo {
+  readonly ownerId: number;
+  code: DiagnosticCode;
+  level: DiagnosticLevel;
+  message: string;
+}
 
 export type DiagnosticCode = "Unknown" |
   GeneralCode |
@@ -118,3 +144,5 @@ export namespace DiagnosticCode {
     return _CODE_BRIEFS[code];
   }
 }
+
+//#endregion

@@ -2,9 +2,10 @@ import { fnv64 } from "@s4tk/hashing";
 import { formatResourceType, formatResourceInstance } from "@s4tk/hashing/formatting";
 import { XmlResource } from "@s4tk/models";
 import { TuningResourceType } from "@s4tk/models/enums";
-import type { OrganizedResources, ValidatedTuning } from "../types";
-import { BIT_RESTRICTIONS, REQUIRED_SIMDATAS } from "../constants";
-import { Diagnose, loadModel } from "../helpers";
+import type { OrganizedResources, ValidatedTuning } from "../types/resources";
+import { BIT_RESTRICTIONS, REQUIRED_SIMDATAS } from "../utils/constants";
+import Diagnose from "../utils/diagnose";
+import { loadModel } from "./helpers";
 
 /**
  * Validates an entry against the `Tuning` schema.

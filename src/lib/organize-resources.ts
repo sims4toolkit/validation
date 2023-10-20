@@ -1,10 +1,8 @@
 import type { RawResource } from "@s4tk/models";
-import type { ResourceKey, ResourceKeyPair } from "@s4tk/models/types";
 import { BinaryResourceType, StringTableLocale, TuningResourceType } from "@s4tk/models/enums";
-import type { ValidatedResource, OrganizedResources, ValidatedTuning, ValidatedSimData, ValidatedStringTable } from "./types";
-import { ValidationSchema } from "./enums";
-
-//#region Exported Functions
+import type { ResourceKey, ResourceKeyPair } from "@s4tk/models/types";
+import type { ValidatedResource, OrganizedResources, ValidatedTuning, ValidatedSimData, ValidatedStringTable } from "./types/resources";
+import { ValidationSchema } from "./types/resources";
 
 /**
  * Organizes resources into a structure that can be used during validation.
@@ -87,8 +85,6 @@ export default function organizeResources(
     schemas: resourcesBySchema
   };
 }
-
-//#endregion
 
 //#region Helper Functions
 
