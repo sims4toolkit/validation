@@ -1,3 +1,5 @@
+export { DiagnosticCode } from "./lib/diagnostic-code";
+
 export {
   DiagnosticLevel,
   ValidationSchema,

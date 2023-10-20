@@ -44,13 +44,13 @@ type StringTableCode =
   "STB_007" |
   "STB_008";
 
-type DiagnosticCode = "Unknown" |
+export type DiagnosticCode = "Unknown" |
   GeneralCode |
   TuningCode |
   SimDataCode |
   StringTableCode;
 
-namespace DiagnosticCode {
+export namespace DiagnosticCode {
   const _CODE_BRIEFS: Record<DiagnosticCode, string> = {
     "Unknown": "Something unexpected went wrong.",
     // General
@@ -78,17 +78,17 @@ namespace DiagnosticCode {
     "DAT_002": "SimData group does not match paired tuning's type.",
     "DAT_003": "SimData group does not exist for paired tuning's type.",
     "DAT_004": "SimData is not paired with tuning file.",
-    "DAT_005": "SimData u attribute does not match paired tuning's group.",
-    "DAT_006": "Suspected SimData not using the SimData type (545AC67A).",
+    "DAT_005": "SimData u attribute does not match tuning group.",
+    "DAT_006": "Suspected SimData not using SimData type.",
     // String Table
-    "STB_001": "Size of string table does not match that of paired locales.",
+    "STB_001": "Size of string table does not match other locales.",
     "STB_002": "String table locale not recognized.",
     "STB_003": "String table does not have every locale paired.",
-    "STB_004": "Same key in use by multiple strings in same string table.",
-    "STB_005": "Same text value appears multiple times in same string table.",
-    "STB_006": "String table has string with key of 0.",
-    "STB_007": "String table has string with key equal to FNV hash of empty string.",
-    "STB_008": "Suspected string table not using the StringTable type (220557DA).",
+    "STB_004": "Multiple strings have same key in same string table.",
+    "STB_005": "Multiple strings have same text in same string table.",
+    "STB_006": "String table has key of 0.",
+    "STB_007": "String table has key equal to FNV hash of empty string.",
+    "STB_008": "Suspected string table not using StringTable type.",
   };
 
   /**
@@ -118,5 +118,3 @@ namespace DiagnosticCode {
     return _CODE_BRIEFS[code];
   }
 }
-
-export default DiagnosticCode;
