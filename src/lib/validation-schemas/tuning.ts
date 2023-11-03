@@ -44,7 +44,7 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
     tuning.dom;
     entry.domValid = true;
   } catch (e) {
-    Diagnose.fatal(entry, "TUN_001", "Failed to parse XML DOM.", e);
+    Diagnose.error(entry, "TUN_001", "Failed to parse XML DOM.", e);
     return;
   }
 
@@ -54,7 +54,7 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
     } else if (tuning.root.tag === "M") {
       _validateModuleTuning(entry, tuning);
     } else {
-      Diagnose.fatal(entry, "TUN_002", `<${tuning.root.tag}> is not a valid root node in XML tuning.`);
+      Diagnose.error(entry, "TUN_002", `<${tuning.root.tag}> is not a valid root node in XML tuning.`);
       return;
     }
 

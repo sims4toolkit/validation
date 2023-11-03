@@ -6,8 +6,7 @@ import Diagnose from "../utils/diagnose";
  * Parses a resource model of type `T` from the buffer in `entry`. If the model
  * is successfully parsed, then `entry.modelLoaded` is set to true and
  * `entry.resource` is set to the parsed model instance. If the model cannot be
- * parsed, then `entry.modelLoaded` remains false and a fatal error is appended
- * to the entry.
+ * parsed, then `entry.modelLoaded` remains false and an error is added.
  * 
  * @param typeName Type name to use in error message, if added
  * @param entry Entry to add parsed model to
@@ -25,6 +24,6 @@ export function loadModel<T extends Resource>(
     entry.resource = model;
     return model;
   } catch (e) {
-    Diagnose.fatal(entry, "GEN_001", `Not a valid ${typeName}.`, e);
+    Diagnose.error(entry, "GEN_001", `Not a valid ${typeName}.`, e);
   }
 }
