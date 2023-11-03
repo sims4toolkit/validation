@@ -60,7 +60,7 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
 
     const { s } = tuning.root.attributes;
     if ((s !== undefined) && (entry.key.instance.toString() !== s)) {
-      Diagnose.error(entry, "TUN_003", `Instance of ${formatResourceInstance(entry.key.instance)} does not match s="${s}".`);
+      Diagnose.error(entry, "TUN_003", `Instance of ${formatResourceInstance(entry.key.instance)} (${entry.key.instance}) does not match s="${s}".`);
     }
   } catch (e) {
     Diagnose.warning(entry, "Unknown", "Exception occurred while validating tuning.", e);
@@ -139,7 +139,7 @@ function _validateTuningSimDataPair(
   } else if (REQUIRED_SIMDATAS.alwaysClasses.has(`${i}:${c}`)) {
     Diagnose.error(entry, "TUN_011", `Tuning class ${c} is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
   } else if (REQUIRED_SIMDATAS.sometimesClasses.has(`${i}:${c}`)) {
-    Diagnose.warning(entry, "TUN_015", `Tuning class ${c} sometimes requires SimData. If functioning as expected, no action is needed.`);
+    Diagnose.warning(entry, "TUN_015", `Tuning class ${c} sometimes requires SimData, and one wasn't found. If functioning as expected, no action is needed.`);
   }
 }
 
