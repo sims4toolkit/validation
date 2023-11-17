@@ -76,7 +76,9 @@ function _runInitialValidation(organized: OrganizedResources) {
           return _tryValidateUnspecified(entry);
       }
     } catch (e) {
-      Diagnose.warning(entry, "Unknown", "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
+      Diagnose.warning(entry, "Unknown", "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", {
+        exception: e
+      });
     }
   });
 }
@@ -103,7 +105,9 @@ function _runPostValidation(organized: OrganizedResources) {
           return postValidateStringTable(entry, organized);
       }
     } catch (e) {
-      Diagnose.warning(entry, "Unknown", "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", e);
+      Diagnose.warning(entry, "Unknown", "An exception was thrown while validating this file. This does not necessarily mean there is something wrong with it.", {
+        exception: e
+      });
     }
   });
 }

@@ -4,7 +4,8 @@ type CodePrefix =
   "GEN" |
   "TUN" |
   "DAT" |
-  "STB";
+  "STB" |
+  "TDS";
 
 type GeneralCode =
   "GEN_001" |
@@ -47,9 +48,25 @@ type StringTableCode =
   "STB_007" |
   "STB_008";
 
+export type TdescCode =
+  "TDS_001" |
+  "TDS_002" |
+  "TDS_003" |
+  "TDS_004" |
+  "TDS_005" |
+  "TDS_006" |
+  "TDS_007" |
+  "TDS_008" |
+  "TDS_009" |
+  "TDS_010" |
+  "TDS_011";
+
 //#endregion
 
 //#region Public Types
+
+/** Proxy type for entries with IDs and diagnostics. */
+export type Diagnosable = { id: number; diagnostics: DiagnosticInfo[]; };
 
 /**
 * How serious a diagnostic is. More serious levels have higher int values.
@@ -58,7 +75,6 @@ export enum DiagnosticLevel {
   Info = 0,
   Warning = 1,
   Error = 2,
-  Fatal = 3,
 }
 
 /**
@@ -69,13 +85,15 @@ export interface DiagnosticInfo {
   code: DiagnosticCode;
   level: DiagnosticLevel;
   message: string;
+  line?: string;
 }
 
 export type DiagnosticCode = "Unknown" |
   GeneralCode |
   TuningCode |
   SimDataCode |
-  StringTableCode;
+  StringTableCode |
+  TdescCode;
 
 export namespace DiagnosticCode {
   const _CODE_BRIEFS: Record<DiagnosticCode, string> = {
@@ -117,6 +135,18 @@ export namespace DiagnosticCode {
     "STB_006": "String table has key of 0.",
     "STB_007": "String table has key equal to FNV hash of empty string.",
     "STB_008": "Suspected string table not using StringTable type.",
+    // TDESC
+    "TDS_001": "Found unexpected value node outside of tunable.",
+    "TDS_002": "Using deprecated property in tunable tuple.",
+    "TDS_003": "Using unrecognized or incorrect XML tag.",
+    "TDS_004": "Missing required property in tunable tuple.",
+    "TDS_005": "Multiple uses of same property in tunable tuple.",
+    "TDS_006": "Using unknown property in tunable tuple.",
+    "TDS_007": "Using unknown type in tunable variant.",
+    "TDS_008": "Variant child name does not match variant type.",
+    "TDS_009": "Using None when not allowed by tunable.",
+    "TDS_010": "Using invalid value in tunable.",
+    "TDS_011": "Using deleted property in tunable tuple.",
   };
 
   /**

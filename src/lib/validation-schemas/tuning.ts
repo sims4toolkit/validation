@@ -44,7 +44,9 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
     tuning.dom;
     entry.domValid = true;
   } catch (e) {
-    Diagnose.error(entry, "TUN_001", "Failed to parse XML DOM.", e);
+    Diagnose.error(entry, "TUN_001", "Failed to parse XML DOM.", {
+      exception: e
+    });
     return;
   }
 
@@ -63,7 +65,9 @@ function _validateStandaloneTuning(entry: ValidatedTuning, tuning: XmlResource) 
       Diagnose.error(entry, "TUN_003", `Instance of ${formatResourceInstance(entry.key.instance)} (${entry.key.instance}) does not match s="${s}".`);
     }
   } catch (e) {
-    Diagnose.warning(entry, "Unknown", "Exception occurred while validating tuning.", e);
+    Diagnose.warning(entry, "Unknown", "Exception occurred while validating tuning.", {
+      exception: e
+    });
   }
 }
 

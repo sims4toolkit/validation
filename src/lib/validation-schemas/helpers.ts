@@ -24,6 +24,8 @@ export function loadModel<T extends Resource>(
     entry.resource = model;
     return model;
   } catch (e) {
-    Diagnose.error(entry, "GEN_001", `Not a valid ${typeName}.`, e);
+    Diagnose.error(entry, "GEN_001", `Not a valid ${typeName}.`, {
+      exception: e
+    });
   }
 }

@@ -1,25 +1,61 @@
-import { ValidatedResource } from "../types/resources";
-import { DiagnosticCode, DiagnosticLevel } from "../types/diagnostics";
+import { DiagnosticCode, Diagnosable, DiagnosticLevel } from "../types/diagnostics";
+
+type DiagnoseOptions = Partial<{
+  exception: Error | string;
+  line: string;
+}>;
 
 /**
  * Utilities for adding diagnostics to validated resources.
  */
 namespace Diagnose {
-  export function info(entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
-    _diagnose(DiagnosticLevel.Info, entry, code, message, error);
+  export function info(
+    entry: Diagnosable,
+    code: DiagnosticCode,
+    message: string,
+    options?: DiagnoseOptions,
+  ) {
+    _diagnose(DiagnosticLevel.Info, entry, code, message, options);
   }
 
-  export function warning(entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
-    _diagnose(DiagnosticLevel.Warning, entry, code, message, error);
+  export function warning(
+    entry: Diagnosable,
+    code: DiagnosticCode,
+    message: string,
+    options?: DiagnoseOptions,
+  ) {
+    _diagnose(DiagnosticLevel.Warning, entry, code, message, options);
   }
 
-  export function error(entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
-    _diagnose(DiagnosticLevel.Error, entry, code, message, error);
+  export function error(
+    entry: Diagnosable,
+    code: DiagnosticCode,
+    message: string,
+    options?: DiagnoseOptions,
+  ) {
+    _diagnose(DiagnosticLevel.Error, entry, code, message, options);
   }
 
-  function _diagnose(level: DiagnosticLevel, entry: ValidatedResource, code: DiagnosticCode, message: string, error?: Error | string) {
-    if (error) message = `${message} [${error instanceof Error ? error.message : error}]`;
-    entry.diagnostics.push({ ownerId: entry.id, code, level, message });
+  function _diagnose(
+    level: DiagnosticLevel,
+    entry: Diagnosable,
+    code: DiagnosticCode,
+    message: string,
+    options?: DiagnoseOptions
+  ) {
+    if (options?.exception) {
+      const error = options.exception;
+      const errorMsg = error instanceof Error ? error.message : error;
+      message = `${message} [${errorMsg}]`;
+    }
+
+    entry.diagnostics.push({
+      ownerId: entry.id,
+      code,
+      level,
+      message,
+      line: options?.line
+    });
   }
 }
 
