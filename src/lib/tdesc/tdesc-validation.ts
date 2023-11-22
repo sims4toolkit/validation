@@ -14,15 +14,17 @@ const OPEN_TAG_REGEX = /<([A-Z])\s*([^<>]*)>/g;
  */
 export function validateTdesc(
   entry: Diagnosable,
-  xml: string,
+  xml: string | Buffer,
   spec: TdescInstanceSpec
 ) {
-  const xmlWithLineNums = xml
+  const xmlContent = typeof xml === "string" ? xml : xml.toString("utf-8");
+
+  const xmlContentWithLines = xmlContent
     .split("\n")
     .map((line, i) => line.replace(OPEN_TAG_REGEX, `<$1 l="${i + 1}" $2>`))
     .join("\n");
 
-  const doc = XmlDocumentNode.from(xmlWithLineNums, {
+  const doc = XmlDocumentNode.from(xmlContentWithLines, {
     ignoreComments: true,
     ignoreProcessingInstructions: true,
   });

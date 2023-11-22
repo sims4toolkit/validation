@@ -1,40 +1,20 @@
-import { XMLParser } from "fast-xml-parser";
+import { RawTdescData } from "./types";
+import { parseRawTdescAsJson } from "./helpers";
+import TdescValidationContext from "./tdesc-context";
 import { TdescInstanceSpec } from "./tdesc-spec";
 
 /**
- * Loads a TDESC JSON into a TdescInstanceSpec and returns it. TDESC JSON format
- * is based on parsing raw TDESC XML with fast-xml-parser v4.3.2 using the
- * following parser options:
- * ```js
- * const options = {
- *  attributeNamePrefix: "",
- *  ignoreAttributes: false,
- *  parseTagValue: false,
- *  preserveOrder: true,
- *  isArray: () => true
- * };
- * ```
+ * TODO:
  * 
  * @param json TDESC JSON
+ * @param context Context in which to load this TDESC
  */
-export function loadTdescJson(json: object): TdescInstanceSpec {
+export function loadTdescSpec(
+  tdesc: RawTdescData,
+  context: TdescValidationContext
+): TdescInstanceSpec {
+  const json = parseRawTdescAsJson(tdesc);
   const instance = json["TuningRoot"][0];
+  // TODO: pass context
   return TdescInstanceSpec.parse(instance["Instance"], instance[":@"]);
-}
-
-/**
- * Loads a TDESC XML document into a TdescInstanceSpec and returns it.
- * 
- * @param xml Original XML content of TDESC
- */
-export function loadTdescXml(xml: string | Buffer): TdescInstanceSpec {
-  const parser = new XMLParser({
-    attributeNamePrefix: "",
-    ignoreAttributes: false,
-    parseTagValue: false,
-    preserveOrder: true,
-    isArray: () => true
-  });
-
-  return loadTdescJson(parser.parse(xml));
 }

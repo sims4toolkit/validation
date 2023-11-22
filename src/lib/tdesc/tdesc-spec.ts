@@ -10,7 +10,7 @@ interface TdescSpecArgs {
 }
 
 abstract class TdescSpec {
-  public readonly tag: "I" | "L" | "U" | "V" | "T" | "E";
+  public readonly tag: "I" | "M" | "L" | "U" | "V" | "T" | "E" | "C";
   public readonly name?: string;
   public readonly required: boolean;
   public readonly deprecated: boolean;
@@ -198,6 +198,25 @@ export class TdescTupleSpec extends _TdescTupleSpecBase {
 export class TdescInstanceSpec extends _TdescTupleSpecBase {
   public readonly tag = "I";
   protected readonly _readableType = "instance";
+
+  constructor(args: TdescTupleSpecArgs) {
+    super(args);
+  }
+
+  static parse(children: object[], attrs: object): TdescInstanceSpec {
+    return new TdescInstanceSpec({
+      childrenSpecs: _parseNamedChildren(children),
+    });
+  }
+
+  protected _validateSelf(xml: XmlNode | undefined, entry: Diagnosable) {
+    super._validateSelf(xml, entry);
+  }
+}
+
+export class TdescModuleSpec extends _TdescTupleSpecBase {
+  public readonly tag = "M";
+  protected readonly _readableType = "module";
 
   constructor(args: TdescTupleSpecArgs) {
     super(args);
