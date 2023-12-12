@@ -161,14 +161,14 @@ function _validateMetaDataRepeats(organized: OrganizedResources) {
 
     if (entry.schema === ValidationSchema.Tuning) {
       const idCount = tuningIds.get(entry.key.instance);
-      if (idCount > 2) {
+      if (idCount > 1) {
         Diagnose.warning(entry, "TUN_013", `Instance of ${entry.key.instance} is being used by ${idCount} tuning files.`);
       }
 
       if (entry.domValid && (entry.resource as XmlResource).root.name) {
         const filename = (entry.resource as XmlResource).root.name;
         const nameCount = tuningNames.get(filename);
-        if (nameCount > 2) {
+        if (nameCount > 1) {
           Diagnose.warning(entry, "TUN_014", `Name of "${filename}" is being used by ${nameCount} tuning files.`);
         }
       }
