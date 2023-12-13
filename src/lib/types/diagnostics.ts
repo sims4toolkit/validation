@@ -46,7 +46,8 @@ type StringTableCode =
   "STB_005" |
   "STB_006" |
   "STB_007" |
-  "STB_008";
+  "STB_008" |
+  "STB_009";
 
 export type TdescCode =
   "TDS_001" |
@@ -135,6 +136,7 @@ export namespace DiagnosticCode {
     "STB_006": "String table has key of 0.",
     "STB_007": "String table has key equal to FNV hash of empty string.",
     "STB_008": "Suspected string table not using StringTable type.",
+    "STB_009": "Multiple string tables with same locale.",
     // TDESC
     "TDS_001": "Found unexpected value node outside of tunable.",
     "TDS_002": "Using deprecated property in tunable tuple.",
