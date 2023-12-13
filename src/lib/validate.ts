@@ -1,6 +1,6 @@
 import { formatResourceKey } from "@s4tk/hashing/formatting";
 import { SimDataResource, type RawResource, StringTableResource, XmlResource, Package } from "@s4tk/models";
-import { BinaryResourceType, EncodingType } from "@s4tk/models/enums";
+import { BinaryResourceType, EncodingType, StringTableLocale } from "@s4tk/models/enums";
 import type { ResourceKeyPair } from "@s4tk/models/types";
 import organizeResources from "./organize";
 import type { OrganizedResources, ValidatedResource, ValidatedUnspecified } from "./types/resources";
@@ -141,6 +141,7 @@ function _validateMetaDataRepeats(organized: OrganizedResources) {
   const resourceKeys = new ItemCounter<string>();
   const tuningIds = new ItemCounter<bigint>();
   const tuningNames = new ItemCounter<string>();
+  const stblLocales = new ItemCounter<StringTableLocale>();
 
   organized.resources.forEach(entry => {
     resourceKeys.count(formatResourceKey(entry.key, "-"));
@@ -149,6 +150,9 @@ function _validateMetaDataRepeats(organized: OrganizedResources) {
       if (entry.domValid && (entry.resource as XmlResource).root.name) {
         tuningNames.count((entry.resource as XmlResource).root.name);
       }
+    } else if (entry.schema === ValidationSchema.StringTable) {
+      const locale = StringTableLocale.getLocale(entry.key.instance);
+      stblLocales.count(locale);
     }
   });
 
@@ -171,6 +175,13 @@ function _validateMetaDataRepeats(organized: OrganizedResources) {
         if (nameCount > 1) {
           Diagnose.warning(entry, "TUN_014", `Name of "${filename}" is being used by ${nameCount} tuning files.`);
         }
+      }
+    } else if (entry.schema === ValidationSchema.StringTable) {
+      const locale = StringTableLocale.getLocale(entry.key.instance);
+      const localeCount = stblLocales.get(locale);
+      if (localeCount > 1) {
+        const localeName = StringTableLocale[locale] ?? "Unknown";
+        Diagnose.info(entry, "STB_009", `There are ${localeCount} string tables with locale "${localeName}"; consider consolidating these into one.`);
       }
     }
   });
