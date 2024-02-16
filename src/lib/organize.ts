@@ -59,7 +59,7 @@ export default function organizeResources(
 
   // pairing string tables
   stblSetToIds.forEach(ids => {
-    let lowestLocale = 100; // highest locale is Swedish at 21
+    let lowestLocale = 256; // 0xFF + 1
     let primaryId = -1;
 
     ids.forEach(id => {
@@ -70,7 +70,7 @@ export default function organizeResources(
         validated.otherLocaleIds.push(idToAdd);
       });
 
-      if (validated.locale < lowestLocale) {
+      if (primaryId === -1 || validated.locale < lowestLocale) {
         lowestLocale = validated.locale;
         primaryId = id;
       }
