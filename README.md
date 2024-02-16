@@ -30,7 +30,7 @@ For now, here is the most useful information:
 // use below for ESM / TS
 import { validatePackageBuffer, validateResources } from "@s4tk/validation";
 
-// useyse below for CJS
+// use below for CJS
 const { validatePackageBuffer, validateResources } = require("@s4tk/validation");
 ```
 
@@ -49,4 +49,4 @@ const result = validateResources(entries); // entries = ResourceKeyPair[] from @
 
 ## Using the validation result
 
-The `result` in all the above lines is a `readonly ValidatedResource[]` object. You can read more about the `ValidatedResource` type and its associated interfaces in lib/types/resources.
+The `result` in all the above lines is a `readonly ValidatedResource[]` object. You can read more about the `ValidatedResource` type and its associated interfaces in [lib/types/resources.ts](https://github.com/sims4toolkit/validation/blob/main/src/lib/types/resources.ts).
