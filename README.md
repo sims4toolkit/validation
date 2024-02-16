@@ -20,4 +20,4 @@ All S4TK software is currently considered to be in its pre-release stage. Use at
 
 ## Documentation
 
-Visit [the webpage](https://sims4toolkit.com/#/docs/validation) for documentation.
+Documentation is not yet available.
