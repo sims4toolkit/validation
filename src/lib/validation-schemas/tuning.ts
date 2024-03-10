@@ -81,7 +81,7 @@ function _validateInstanceTuning(entry: ValidatedTuning, tuning: XmlResource) {
 
   const isLikelyCustom = entry.key.instance > 2 ** 24 || n?.includes(":");
   if (isLikelyCustom && !groupIsBaseGame(entry.key.group)) {
-    Diagnose.info(entry, "TUN_016", `Tuning does not appear to be an override, but is using a group incompatible with the Base Game (${formatResourceGroup(entry.key.group)}). Unless this file is intentionally pack-restricted, use a group of 00000000 or 80000000 instead.`);
+    Diagnose.info(entry, "TUN_016", `Group of ${formatResourceGroup(entry.key.group)} will not load with the Base Game. This is not an issue for intentionally pack-restricted files/overrides. For the Base Game, use a group of 00000000 or 80000000.`);
   }
 
   // checking bit restrictions
