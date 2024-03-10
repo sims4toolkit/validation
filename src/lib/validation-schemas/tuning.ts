@@ -1,11 +1,11 @@
 import { fnv64 } from "@s4tk/hashing";
-import { formatResourceType, formatResourceInstance } from "@s4tk/hashing/formatting";
+import { formatResourceGroup, formatResourceType, formatResourceInstance } from "@s4tk/hashing/formatting";
 import { XmlResource } from "@s4tk/models";
 import { TuningResourceType } from "@s4tk/models/enums";
 import type { OrganizedResources, ValidatedTuning } from "../types/resources";
 import { BIT_RESTRICTIONS, REQUIRED_SIMDATAS } from "../utils/constants";
 import Diagnose from "../utils/diagnose";
-import { loadModel } from "./helpers";
+import { groupIsBaseGame, loadModel } from "./helpers";
 
 /**
  * Validates an entry against the `Tuning` schema.
@@ -79,6 +79,11 @@ function _validateInstanceTuning(entry: ValidatedTuning, tuning: XmlResource) {
     return;
   }
 
+  const isLikelyCustom = entry.key.instance > 2 ** 24 || n?.includes(":");
+  if (isLikelyCustom && !groupIsBaseGame(entry.key.group)) {
+    Diagnose.info(entry, "TUN_016", `Tuning does not appear to be an override, but is using a group incompatible with the Base Game (${formatResourceGroup(entry.key.group)}). Unless this file is intentionally pack-restricted, use a group of 00000000 or 80000000 instead.`);
+  }
+
   // checking bit restrictions
   for (let i = 0; i < BIT_RESTRICTIONS.length; ++i) {
     const { maxBits, maxValue, classNames, rootTests } = BIT_RESTRICTIONS[i];
@@ -140,10 +145,13 @@ function _validateTuningSimDataPair(
   if (REQUIRED_SIMDATAS.alwaysTypes.has(i)) {
     const tuningTypeName = TuningResourceType[entry.key.type] ?? "Unknown";
     Diagnose.error(entry, "TUN_011", `Tuning type ${tuningTypeName} (${formatResourceType(entry.key.type)}) is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
+  } else if (REQUIRED_SIMDATAS.sometimesTypes.has(i)) {
+    const tuningTypeName = TuningResourceType[entry.key.type] ?? "Unknown";
+    Diagnose.info(entry, "TUN_015", `Tuning type ${tuningTypeName} (${formatResourceType(entry.key.type)}) sometimes requires SimData, and one wasn't found. If functioning as expected, no action is needed.`);
   } else if (REQUIRED_SIMDATAS.alwaysClasses.has(`${i}:${c}`)) {
     Diagnose.error(entry, "TUN_011", `Tuning class ${c} is known to require SimData, but one wasn't found. If the SimData does exist, ensure its instance matches this tuning.`);
   } else if (REQUIRED_SIMDATAS.sometimesClasses.has(`${i}:${c}`)) {
-    Diagnose.warning(entry, "TUN_015", `Tuning class ${c} sometimes requires SimData, and one wasn't found. If functioning as expected, no action is needed.`);
+    Diagnose.info(entry, "TUN_015", `Tuning class ${c} sometimes requires SimData, and one wasn't found. If functioning as expected, no action is needed.`);
   }
 }
 

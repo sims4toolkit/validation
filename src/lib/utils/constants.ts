@@ -109,6 +109,9 @@ export const REQUIRED_SIMDATAS = {
     "weather_forecast",
     "zone_modifier"
   ]),
+  sometimesTypes: new Set([
+    "object",
+  ]),
   alwaysClasses: new Set([
     "aspiration:Aspiration",
     "aspiration:AspirationAssignment",
@@ -123,26 +126,6 @@ export const REQUIRED_SIMDATAS = {
     "career_gig:HomeAssignmentGig",
     "career_gig:RabbitholeGig",
     "drama_node:MajorOrganizationEventDramaNode",
-    "object:Aquarium",
-    "object:Baby",
-    "object:Door",
-    "object:Fire",
-    "object:FireSprinklerHead",
-    "object:Fish",
-    "object:FishBowl",
-    "object:HalfWall",
-    "object:Jig",
-    "object:Ocean",
-    "object:Pond",
-    "object:PoolSeat",
-    "object:PrototypeObject",
-    "object:Puddle",
-    "object:Rug",
-    "object:SectionalSofa",
-    "object:SectionalSofaPiece",
-    "object:Sim",
-    "object:SwimmingPool",
-    "object:Terrain",
     "recipe:MusicRecipe",
     "recipe:PaintByReferenceRecipe",
     "recipe:PaintingRecipe",
@@ -171,6 +154,6 @@ export const REQUIRED_SIMDATAS = {
     "statistic:Statistic"
   ]),
   sometimesClasses: new Set([
-    "object:GameObject"
+    // intentionally blank
   ]),
 };

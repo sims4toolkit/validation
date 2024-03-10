@@ -28,7 +28,8 @@ type TuningCode =
   "TUN_012" |
   "TUN_013" |
   "TUN_014" |
-  "TUN_015";
+  "TUN_015" |
+  "TUN_016";
 
 type SimDataCode =
   "DAT_001" |
@@ -120,6 +121,7 @@ export namespace DiagnosticCode {
     "TUN_013": "Same instance in use by multiple tuning files.",
     "TUN_014": "Same name in use by multiple tuning files.",
     "TUN_015": "Tuning is missing optional SimData.",
+    "TUN_016": "Non-override tuning is using non-BG group.",
     // SimData
     "DAT_001": "SimData name does not match paired tuning's name.",
     "DAT_002": "SimData group does not match paired tuning's type.",

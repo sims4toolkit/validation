@@ -29,3 +29,12 @@ export function loadModel<T extends Resource>(
     });
   }
 }
+
+/**
+ * Checks if the provided group is valid for a custom BG tuning.
+ * 
+ * @param group Group to test
+ */
+export function groupIsBaseGame(group: number): boolean {
+  return group === 0 || group === 0x80000000;
+}
